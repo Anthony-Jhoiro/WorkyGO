@@ -13,6 +13,11 @@ This project aims to run workflows with containerized steps. Each step will run 
 - User can create custom triggers for their workflows.
 - User can add steps through existing images or custom Dockerfiles.
 
+## Technologies
+- Go
+- React with Typescript
+- Docker
+- Kubernetes (if I got the time)
 
 ## Authors 
 - Anthony Quéré (Anthony-Jhoiro)
