@@ -1,0 +1,9 @@
+workflow:
+  steps:
+    - name: test
+      image: node:latest
+      workdir: /cow
+      commands: |
+        yarn add cowsay
+        yarn cowsay Hello ! {{ .Env.ENV1 }}
+

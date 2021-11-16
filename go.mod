@@ -2,10 +2,16 @@ module Workflow
 
 go 1.17
 
-require github.com/docker/docker v20.10.9+incompatible
+require (
+	github.com/ahmetb/dlog v0.0.0-20170105205344-4fb5f8204f26
+	github.com/docker/docker v20.10.9+incompatible
+	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+)
 
 require (
 	github.com/Microsoft/go-winio v0.4.17 // indirect
+	github.com/ahmetalpbalkan/dlog v0.0.0-20170105205344-4fb5f8204f26 // indirect
 	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
