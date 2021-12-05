@@ -64,7 +64,7 @@ func (d *Config) clearEntrypointFile() error {
 func (d *Config) getDockerVolumes() []mount.Mount {
 	volumesMounts := make([]mount.Mount, 0, len(d.Volumes)+1)
 
-	// Mount config volumes
+	// Mount configParser volumes
 	for _, v := range d.Volumes {
 		volume := mount.Mount{
 			Type:     mount.TypeVolume,
@@ -82,9 +82,7 @@ func (d *Config) getDockerVolumes() []mount.Mount {
 		Target:   "/entrypoint/entrypoint.sh",
 		ReadOnly: true,
 	}
-	volumesMounts = append(volumesMounts, volume)
-
-	return volumesMounts
+	return append(volumesMounts, volume)
 }
 
 // getTimeout returns the maximum time that a container can live

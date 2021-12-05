@@ -3,7 +3,9 @@ workflow:
     - name: test
       image: node:latest
       workdir: /cow
+      env:
+        PORTE: clef
       commands: |
         yarn add cowsay
-        yarn cowsay Hello ! {{ .Env.ENV1 }}
+        yarn cowsay Hello ! $PORTE
 
