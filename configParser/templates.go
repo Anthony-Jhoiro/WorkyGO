@@ -11,12 +11,13 @@ type StepDockerPersistFormat struct {
 }
 
 type StepDockerFormat struct {
-	Name     string
-	Image    string
-	Workdir  string
-	Commands string
+	Name      string   `json:"name"`
+	Image     string   `json:"image"`
+	Workdir   string   `json:"workdir,omitempty"`
+	Commands  string   `json:"commands"`
+	DependsOn []string `json:"depends_on,omitempty"`
 	//Env      *map[string]string
-	Persist []StepDockerPersistFormat
+	Persist []StepDockerPersistFormat `json:"persist,omitempty"`
 }
 
 type StepImportedFormat struct {
