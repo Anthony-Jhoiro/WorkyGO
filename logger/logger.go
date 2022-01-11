@@ -9,4 +9,7 @@ type Context struct {
 type Logger interface {
 	Init(Context) error
 	Log(string, io.Reader) error
+	Debug(string)
 }
+
+var LOG = FileLogger{}

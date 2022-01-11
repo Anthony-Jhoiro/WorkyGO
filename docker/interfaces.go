@@ -37,12 +37,12 @@ type DockerImageConfig struct {
 }
 
 type Container struct {
+	StepId string
 	config configInterface
 	container.ContainerCreateCreatedBody
 	client *client.Client
 	context.Context
-	LogFile *os.File
-	Name    string
+	Name string
 }
 
 type configInterface interface {

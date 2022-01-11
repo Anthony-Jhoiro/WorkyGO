@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 )
@@ -29,7 +30,7 @@ func (fl *FileLogger) Init(ctx Context) error {
 	return nil
 }
 
-func (fl *FileLogger) Log(historyRelativePath string, stream io.Reader) error {
+func (fl FileLogger) Log(historyRelativePath string, stream io.Reader) error {
 	// Create file if not exists
 	filePath := path.Join(fl.historyPath, historyRelativePath)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -53,4 +54,16 @@ func (fl *FileLogger) Log(historyRelativePath string, stream io.Reader) error {
 		return fmt.Errorf("fail to write in log file %v", err)
 	}
 	return nil
+}
+
+func (fl FileLogger) Debug(message string) {
+	f, err := os.OpenFile(path.Join(fl.historyPath, "debug.log"),
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Printf("[WARNING] : Fail to open debug file : %v", err)
+	}
+	defer f.Close()
+	if _, err := f.WriteString(fmt.Sprintf("%s\n", message)); err != nil {
+		log.Printf("[WARNING] : Fail to write into debug file : %v", err)
+	}
 }

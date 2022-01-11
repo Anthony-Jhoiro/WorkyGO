@@ -1,10 +1,10 @@
 package configParser
 
 import (
+	"Workflow/logger"
 	"bytes"
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"log"
 	"strconv"
 	"text/template"
 )
@@ -38,7 +38,7 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Runner
 		return nil, fmt.Errorf("fail to load metadata : %v", err)
 	}
 
-	log.Printf("Metadata %v\n", metadata)
+	logger.LOG.Debug(fmt.Sprintf("Metadata %v", metadata))
 
 	// Apply arguments to the file
 	workflowArguments, err := metadata.BuildWorkflowArgument(arguments)
@@ -46,12 +46,14 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Runner
 		return nil, fmt.Errorf("fail to compile workflow parameters : %v", err)
 	}
 
-	log.Printf("Arguments : %v", workflowArguments)
+	logger.LOG.Debug(fmt.Sprintf("Arguments : %v", workflowArguments))
 
 	format, err := DecodeWorkflowFile(fileContent, workflowArguments)
 	if err != nil {
 		return nil, fmt.Errorf("fail to decode workflow : %v", err)
 	}
+
+	logger.LOG.Debug(fmt.Sprintf("Workflow : %v", format))
 
 	return BuildWorkflow(*format, *metadata)
 }
@@ -117,8 +119,6 @@ func DecodeWorkflowFile(fileContent []byte, workflowArguments map[string]interfa
 	if err != nil {
 		return nil, fmt.Errorf("fail to parse workflow : %v", err)
 	}
-
-	log.Printf("Workflow : %v", workflowData)
 
 	return &workflowData, nil
 }

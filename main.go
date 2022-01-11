@@ -11,8 +11,7 @@ import (
 
 func main() {
 
-	fileLogger := logger.FileLogger{}
-	err := fileLogger.Init(logger.Context{RunName: strconv.FormatInt(time.Now().Unix(), 10)})
+	err := logger.LOG.Init(logger.Context{RunName: strconv.FormatInt(time.Now().Unix(), 10)})
 	if err != nil {
 		log.Fatalf("Fail to initialize logger : %v", err)
 	}

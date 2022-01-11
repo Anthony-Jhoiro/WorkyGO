@@ -4,14 +4,13 @@ import (
 	"Workflow/docker"
 	"Workflow/workflow"
 	"fmt"
-	"log"
 )
 
-func (tpl *StepDockerFormat) ToWorkFlowStep() *workflow.Step {
+func (tpl *StepDocker) ToWorkFlowStep() *workflow.Step {
 	return workflow.NewSimpleStep(tpl.Name, tpl.Name, "", tpl.Run)
 }
 
-func (tpl *StepDockerFormat) Run(context *interface{}) error {
+func (tpl *StepDocker) Run(_ *interface{}) error {
 
 	volumes := make([]docker.VolumeConfig, 0, len(tpl.Persist))
 
@@ -36,9 +35,8 @@ func (tpl *StepDockerFormat) Run(context *interface{}) error {
 			Commands:   []string{tpl.Commands},
 		},
 	}
-	// Pull image
 
-	container, err := docker.NewContainer(dockerConfig)
+	container, err := docker.NewContainer(dockerConfig, tpl.Id)
 	if err != nil {
 		return fmt.Errorf("fail to create container %v", err)
 	}
@@ -52,12 +50,6 @@ func (tpl *StepDockerFormat) Run(context *interface{}) error {
 	if err != nil {
 		return fmt.Errorf("fail to run the container %v", err)
 	}
-
-	logs, err := container.GetLogs()
-	if err != nil {
-		log.Fatalf("Fail to parse logs %v\n", err)
-	}
-	log.Println(logs)
 
 	return nil
 }

@@ -20,6 +20,16 @@ type StepDockerFormat struct {
 	Persist []StepDockerPersistFormat `json:"persist,omitempty"`
 }
 
+type StepDocker struct {
+	Id        string
+	Name      string
+	Image     string
+	Workdir   string
+	Commands  string
+	DependsOn []string
+	Persist   []StepDockerPersistFormat
+}
+
 type StepImportedFormat struct {
 	Name       string
 	Workflow   string
@@ -51,7 +61,6 @@ type ParameterTemplate struct {
 
 type WorkflowParameterType string
 
-//boolean, string, character, integer, floating-point
 const (
 	NumberType  WorkflowParameterType = "number"
 	BooleanType                       = "boolean"
