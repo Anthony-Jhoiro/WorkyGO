@@ -2,11 +2,20 @@ package main
 
 import (
 	"Workflow/configParser"
+	"Workflow/logger"
 	"io/ioutil"
 	"log"
+	"strconv"
+	"time"
 )
 
 func main() {
+
+	err := logger.LOG.Init(logger.Context{RunName: strconv.FormatInt(time.Now().Unix(), 10)})
+	if err != nil {
+		log.Fatalf("Fail to initialize logger : %v", err)
+	}
+
 	// Open file
 	yfile, err := ioutil.ReadFile("examples/example2/workflow.yaml")
 
@@ -24,8 +33,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Res", res)
 
 	res.Workflow.Run()
 }

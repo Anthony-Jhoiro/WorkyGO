@@ -1,14 +1,13 @@
 package docker
 
 import (
+	"Workflow/logger"
 	"context"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"io"
-	"io/ioutil"
-	"os"
+	"path"
 	"time"
 )
 
@@ -19,13 +18,10 @@ func RandContainerName() string {
 }
 
 // NewContainer create a new container instance from a configuration
-func NewContainer(config *DockerImageConfig) (*Container, error) {
+func NewContainer(config *DockerImageConfig, stepId string) (*Container, error) {
 	c := &Container{}
+	c.StepId = stepId
 	c.config = config
-	err := c.Init()
-	if err != nil {
-		return nil, err
-	}
 
 	return c, nil
 }
@@ -35,13 +31,7 @@ func (c *Container) Init() error {
 	// Setup Context
 	c.Context = context.Background()
 
-	// Setup log file
-	tmpFile, err := ioutil.TempFile("/tmp", "wf-c-logs-")
-	if err != nil {
-		return err
-	}
-	c.LogFile = tmpFile
-
+	var err error
 	// Add docker client
 	c.client, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
@@ -76,9 +66,10 @@ func (c *Container) PullImage() error {
 	if err != nil {
 		panic(err)
 	}
-	_, err = io.Copy(os.Stdout, out)
+
+	err = logger.LOG.Log(path.Join("steps", c.StepId, "pull.log"), out)
 	if err != nil {
-		return err
+		return fmt.Errorf("fail to redirect logs")
 	}
 
 	err = out.Close()
@@ -109,7 +100,7 @@ func (c *Container) exec() error {
 		return err
 	}
 
-	// Redirect the container logs to the log file
+	// Redirect the container logs to the logger file
 	out, err := c.client.ContainerLogs(c.Context, c.ID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
@@ -124,7 +115,10 @@ func (c *Container) exec() error {
 		return err
 	}
 
-	_, err = io.Copy(c.LogFile, out)
+	err = logger.LOG.Log(path.Join("steps", c.StepId, "run.log"), out)
+	if err != nil {
+		return fmt.Errorf("fail to redirect logs : %v", err)
+	}
 
 	// Wait until the container exec process is completed
 	statusCh, errCh := c.client.ContainerWait(c.Context, c.ID, container.WaitConditionNotRunning)
@@ -141,14 +135,9 @@ func (c *Container) exec() error {
 
 // clear clean the container runtime elements :
 func (c *Container) clear() error {
-	// Close log file
-	err := c.LogFile.Close()
-	if err != nil {
-		return err
-	}
 
 	// Delete entrypoint file
-	err = c.config.destroy()
+	err := c.config.destroy()
 	if err != nil {
 		return err
 	}
@@ -159,13 +148,4 @@ func (c *Container) clear() error {
 		RemoveLinks:   false,
 		Force:         false,
 	})
-}
-
-// GetLogs get the logs of the container as a string.
-func (c *Container) GetLogs() (string, error) {
-	logs, err := ioutil.ReadFile(c.LogFile.Name())
-	if err != nil {
-		return "", err
-	}
-	return string(logs), nil
 }

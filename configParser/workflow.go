@@ -13,6 +13,18 @@ type Runner struct {
 	Workflow    *workflow.Workflow
 }
 
+func NewStepDocker(f StepDockerFormat) *StepDocker {
+	return &StepDocker{
+		Id:        fmt.Sprintf("step-%s", f.Name),
+		Name:      f.Name,
+		Image:     f.Image,
+		Workdir:   f.Workdir,
+		Commands:  f.Commands,
+		DependsOn: f.DependsOn,
+		Persist:   f.Persist,
+	}
+}
+
 func BuildWorkflow(template WorkflowFileTemplate, metadata WorkflowMetadataTemplate) (*Runner, error) {
 
 	var runner Runner
@@ -29,7 +41,8 @@ func BuildWorkflow(template WorkflowFileTemplate, metadata WorkflowMetadataTempl
 			return nil, err
 		}
 		// TODO : manage other steps
-		dockerStep := step.(StepDockerFormat)
+		dockerStepFormat := step.(StepDockerFormat)
+		dockerStep := NewStepDocker(dockerStepFormat)
 		s := dockerStep.ToWorkFlowStep()
 
 		// Manage requirements
