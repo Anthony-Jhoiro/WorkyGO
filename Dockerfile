@@ -1,4 +1,4 @@
-FROM golang:1.17
+FROM golang:1.17 as builder
 
 
 WORKDIR /app
@@ -7,9 +7,13 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 
-COPY *.go ./
+COPY . .
 
 RUN go build -o /wf
 
+FROM docker:dind
 
-CMD [ "/wf" ]
+COPY --from=builder /wf .
+
+
+CMD [ "./wf" ]

@@ -5,13 +5,18 @@ package configParser
 type WorkflowStep interface {
 }
 
+type StepDockerPersistFormat struct {
+	Name   string
+	Source string
+}
+
 type StepDockerFormat struct {
 	Name     string
 	Image    string
 	Workdir  string
 	Commands string
 	//Env      *map[string]string
-	Persist []interface{}
+	Persist []StepDockerPersistFormat
 }
 
 type StepImportedFormat struct {

@@ -12,15 +12,31 @@ func (tpl *StepDockerFormat) ToWorkFlowStep() *workflow.Step {
 }
 
 func (tpl *StepDockerFormat) Run(context *interface{}) error {
+
+	volumes := make([]docker.VolumeConfig, 0, len(tpl.Persist))
+
+	for _, v := range tpl.Persist {
+		volumes = append(volumes, docker.VolumeConfig{
+			Label:            v.Name,
+			ContainerMapping: v.Source,
+			ReadOnly:         false,
+			Persistent:       true,
+		})
+	}
+
 	dockerConfig := &docker.DockerImageConfig{
 		Image:   tpl.Image,
 		Command: tpl.Commands,
 		Config: docker.Config{
+			Volumes:    volumes,
+			Env:        nil,
+			WorkingDir: "",
 			Entrypoint: "/bin/sh",
 			Name:       "tata",
 			Commands:   []string{tpl.Commands},
 		},
 	}
+	// Pull image
 
 	container, err := docker.NewContainer(dockerConfig)
 	if err != nil {

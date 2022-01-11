@@ -32,6 +32,7 @@ type WorkflowMetadataTemplate struct {
 
 // ParseWorkflowFile Parse the content of a workflow file with the given arguments
 func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Runner, error) {
+	// Load the file metadata
 	metadata, err := LoadMetadata(fileContent)
 	if err != nil {
 		return nil, fmt.Errorf("fail to load metadata : %v", err)

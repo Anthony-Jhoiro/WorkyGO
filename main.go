@@ -63,7 +63,7 @@ func main() {
 	arguments := make(map[string]string)
 
 	arguments["git_repo"] = "https://github.com/Anthony-Jhoiro/sample_git.git"
-	arguments["output"] = "toto"
+	arguments["output"] = "test-wf-1"
 
 	res, err := configParser.ParseWorkflowFile(yfile, arguments)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/docker/docker/client"
 	"io"
 	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -50,6 +51,12 @@ func (c *Container) Init() error {
 	// Container name
 	c.Name = RandContainerName()
 
+	// Pull container image
+	err = c.PullImage()
+	if err != nil {
+		return err
+	}
+
 	// Set up the configuration
 	err = c.config.initialize(*c)
 	if err != nil {
@@ -59,6 +66,22 @@ func (c *Container) Init() error {
 	// Create the container
 	c.ContainerCreateCreatedBody, err = createContainer(*c)
 
+	return err
+}
+
+func (c *Container) PullImage() error {
+	// Pull docker image
+	out, err := c.client.ImagePull(c.Context, c.config.image(), types.ImagePullOptions{})
+
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.Copy(os.Stdout, out)
+	if err != nil {
+		return err
+	}
+
+	err = out.Close()
 	return err
 }
 
