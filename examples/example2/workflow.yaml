@@ -17,12 +17,23 @@ imports:
 
 workflow:
   steps:
-    - name: Git Clone Repository
+    - name: GitCloneRepository
       image: alpine/git:v2.32.0
       workdir: /app
       commands: |
         echo Hello World !
         git clone {{ index .Parameters "git_repo" }} .
+      persist:
+        - name: "{{ index .Parameters "output" }}"
+          source: /app
+
+    - name: Execute Python code
+      depends_on:
+        - GitCloneRepository
+      image: python:slim
+      workdir: /app
+      commands: |
+        python3 script.py
       persist:
         - name: "{{ index .Parameters "output" }}"
           source: /app
