@@ -35,7 +35,7 @@ func (c *Container) Init() error {
 	// Setup Context
 	c.Context = context.Background()
 
-	// Setup log file
+	// Setup logger file
 	tmpFile, err := ioutil.TempFile("/tmp", "wf-c-logs-")
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (c *Container) exec() error {
 		return err
 	}
 
-	// Redirect the container logs to the log file
+	// Redirect the container logs to the logger file
 	out, err := c.client.ContainerLogs(c.Context, c.ID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
@@ -141,7 +141,7 @@ func (c *Container) exec() error {
 
 // clear clean the container runtime elements :
 func (c *Container) clear() error {
-	// Close log file
+	// Close logger file
 	err := c.LogFile.Close()
 	if err != nil {
 		return err
