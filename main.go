@@ -34,7 +34,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println("Res", res)
-
 	res.Workflow.Run()
 }
