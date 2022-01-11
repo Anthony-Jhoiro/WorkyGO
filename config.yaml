@@ -1,0 +1,14 @@
+
+
+name: "{{ .Env.env_a }}"
+env:
+  env_a: "{{ .Env.env_b }}"
+  env_b: "{{ .Name }}"
+
+commands:
+  - yarn add cowsay
+  - yarn cowsay Hello World !
+
+image: node:latest
+workdir: /cow
+
