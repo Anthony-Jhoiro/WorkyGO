@@ -18,10 +18,10 @@ func MapDictToStep(stepDefinition interface{}) (WorkflowStep, error) {
 		return dockerStep, nil
 	}
 
-	//importedStep, ok := stepDefinition.(StepImportedFormat)
-	//if ok {
-	//	return importedStep, nil
-	//}
+	importedStep, ok := stepDefinition.(StepImportedFormat)
+	if ok {
+		return importedStep, nil
+	}
 
 	return nil, fmt.Errorf("invalid step")
 }

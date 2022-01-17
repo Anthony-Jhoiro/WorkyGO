@@ -31,10 +31,10 @@ type StepDocker struct {
 }
 
 type StepImportedFormat struct {
-	Name       string
-	Workflow   string
-	Env        map[string]string
-	Parameters map[string]string
+	Name      string
+	Workflow  string
+	Env       map[string]string
+	Arguments map[string]string
 }
 
 type WorkflowWorkflowFormat struct {
