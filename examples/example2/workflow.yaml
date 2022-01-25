@@ -10,9 +10,9 @@ parameters:
   output:
     type: string
 
-imports:
-  - name: git_workflow
-    url: https://example.com/file.yaml
+#imports:
+#  - name: git_workflow
+#    url: https://example.com/file.yaml
 ---
 
 workflow:
@@ -29,7 +29,7 @@ workflow:
 
     - name: Execute Python code
       depends_on:
-        - GitCloneRepository
+        - gitclonerepository
       image: python:slim
       workdir: /app
       commands: |

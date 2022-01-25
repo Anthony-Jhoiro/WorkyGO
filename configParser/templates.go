@@ -1,5 +1,7 @@
 package configParser
 
+import "Workflow/docker"
+
 // Workflow File
 
 type WorkflowStep interface {
@@ -28,6 +30,7 @@ type StepDocker struct {
 	Commands  string
 	DependsOn []string
 	Persist   []StepDockerPersistFormat
+	Volumes   []docker.VolumeConfig
 }
 
 type StepImportedFormat struct {
@@ -38,7 +41,7 @@ type StepImportedFormat struct {
 }
 
 type WorkflowWorkflowFormat struct {
-	Steps []map[string]interface{}
+	Steps []interface{}
 }
 
 type WorkflowFormat struct {

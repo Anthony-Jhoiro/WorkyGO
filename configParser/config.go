@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"gopkg.in/yaml.v3"
+	"log"
 	"strconv"
 	"text/template"
 )
@@ -30,12 +31,30 @@ type WorkflowMetadataTemplate struct {
 	Imports     []ImportTemplate             `yaml:"imports"`
 }
 
+type ParsedWorkflow struct {
+	Name        string
+	Description string
+	Maintainer  string
+	Arguments   string
+	Steps       []interface{}
+}
+
 // ParseWorkflowFile Parse the content of a workflow file with the given arguments
-func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Runner, error) {
+func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*ParsedWorkflow, error) {
 	// Load the file metadata
 	metadata, err := LoadMetadata(fileContent)
 	if err != nil {
 		return nil, fmt.Errorf("fail to load metadata : %v", err)
+	}
+
+	if len(metadata.Imports) > 0 {
+		log.Println("[WARNING] : Using external templates can expose your system to several risks.")
+		for _, externalTemplate := range metadata.Imports {
+			err = ResolveExternalTemplate(externalTemplate)
+			if err != nil {
+				return nil, fmt.Errorf("fail to import template : %v", err)
+			}
+		}
 	}
 
 	logger.LOG.Debug(fmt.Sprintf("Metadata %v", metadata))
@@ -55,7 +74,13 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Runner
 
 	logger.LOG.Debug(fmt.Sprintf("Workflow : %v", format))
 
-	return BuildWorkflow(*format, *metadata)
+	return &ParsedWorkflow{
+		Name:        metadata.Name,
+		Description: metadata.Description,
+		Maintainer:  metadata.Maintainer,
+		Arguments:   "", // TODO : argument is string ???
+		Steps:       format.Workflow.Steps,
+	}, nil
 }
 
 // CastParameter Cast a string to the given WorkflowParameterType

@@ -3,6 +3,7 @@ package main
 import (
 	"Workflow/configParser"
 	"Workflow/logger"
+	"Workflow/stepMapper"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -29,10 +30,16 @@ func main() {
 	arguments["git_repo"] = "https://github.com/Anthony-Jhoiro/sample_git.git"
 	arguments["output"] = "test-wf-1"
 
-	res, err := configParser.ParseWorkflowFile(yfile, arguments)
+	parsedWorkflow, err := configParser.ParseWorkflowFile(yfile, arguments)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	res.Workflow.Run()
+	runner, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	runner.Workflow.Run()
 }

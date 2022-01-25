@@ -32,17 +32,17 @@ func (step *ExternalStep) TemplateFileExists() bool {
 
 func (step *ExternalStep) Run(_ *interface{}) error {
 	// Search for file on system
-	templateFile, err := os.ReadFile(step.GetFileName())
-	if err != nil {
-		return fmt.Errorf("fail to read external workflow %s : %v", step.WorkflowName, err)
-	}
+	//templateFile, err := os.ReadFile(step.GetFileName())
+	//if err != nil {
+	//	return fmt.Errorf("fail to read external workflow %s : %v", step.WorkflowName, err)
+	//}
+	//
+	//res, err := ParseWorkflowFile(templateFile, step.Arguments)
+	//if err != nil {
+	//	return fmt.Errorf("fail to parse external workflow %s : %v", step.WorkflowName, err)
+	//}
 
-	res, err := ParseWorkflowFile(templateFile, step.Arguments)
-	if err != nil {
-		return fmt.Errorf("fail to parse external workflow %s : %v", step.WorkflowName, err)
-	}
-
-	res.Workflow.Run()
+	//res.Workflow.Run()
 
 	return nil
 }

@@ -9,6 +9,18 @@ type SimpleStep struct {
 	runFunction RunFunction
 }
 
+func (step *SimpleStep) Init() error {
+	return nil
+}
+
+func (step *SimpleStep) Clean() {
+
+}
+
+func (step *SimpleStep) GetDependencies() []string {
+	return nil
+}
+
 func (step *SimpleStep) GetLabel() string {
 	return step.label
 }
