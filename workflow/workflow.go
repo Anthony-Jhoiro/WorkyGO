@@ -45,11 +45,7 @@ func (wf *Workflow) Run() {
 
 		cmd := exec.Command("clear") //Linux example, its tested
 		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err != nil {
-			fmt.Printf("Can not clear screen")
-			continue
-		}
+		_ = cmd.Run()
 		wf.Print()
 	}
 }

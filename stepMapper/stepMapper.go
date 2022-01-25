@@ -7,25 +7,25 @@ import (
 	"strings"
 )
 
-func ParseWorkflowSteps(parsedWorkflow configParser.ParsedWorkflow) (*configParser.Runner, error) {
+func ParseWorkflowSteps(parsedWorkflow configParser.ParsedWorkflow) (*workflow.Workflow, error) {
 	steps, err := mapMultipleSteps(parsedWorkflow.Steps)
 
 	if err != nil {
 		return nil, fmt.Errorf("fail to map steps : %v", err)
 	}
 
-	return buildWorkflow(parsedWorkflow, steps)
+	return buildWorkflow(steps)
 }
 
-func buildWorkflow(parsedWorkflow configParser.ParsedWorkflow, stepsDefinitions []workflow.StepDefinition) (*configParser.Runner, error) {
-	steps := make([]*workflow.Step, 0, len(stepsDefinitions))
+func buildWorkflow(stepsDefinitions []workflow.StepDefinition) (*workflow.Workflow, error) {
+	steps := make([]*workflow.Step, 0, len(stepsDefinitions)+1)
 
 	stepMapper := map[string]*workflow.Step{}
 
 	for _, stepDefinition := range stepsDefinitions {
 		step := &workflow.Step{
 			StepDefinition: stepDefinition,
-			Status:         0,
+			Status:         workflow.StepPending,
 			NextSteps:      make([]*workflow.Step, 0, len(stepsDefinitions)),
 			PreviousSteps:  make([]*workflow.Step, 0, len(stepDefinition.GetDependencies())),
 		}
@@ -37,7 +37,7 @@ func buildWorkflow(parsedWorkflow configParser.ParsedWorkflow, stepsDefinitions 
 
 	initialStep := &workflow.Step{
 		StepDefinition: initialStepDef,
-		Status:         0,
+		Status:         workflow.StepPending,
 		NextSteps:      make([]*workflow.Step, 0, len(stepsDefinitions)),
 		PreviousSteps:  make([]*workflow.Step, 0),
 	}
@@ -58,17 +58,11 @@ func buildWorkflow(parsedWorkflow configParser.ParsedWorkflow, stepsDefinitions 
 		}
 	}
 
+	steps = append(steps, initialStep)
+
 	wf := workflow.NewWorkflow(initialStep, steps)
 
-	runner := &configParser.Runner{
-		Name:        parsedWorkflow.Name,
-		Description: parsedWorkflow.Description,
-		Maintainer:  parsedWorkflow.Maintainer,
-		Arguments:   parsedWorkflow.Arguments,
-		Workflow:    wf,
-	}
-
-	return runner, nil
+	return wf, nil
 }
 
 func mapMultipleSteps(stepTemplates []interface{}) ([]workflow.StepDefinition, error) {

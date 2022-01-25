@@ -35,11 +35,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	runner, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
+	workflow, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	runner.Workflow.Run()
+	workflow.Run()
 }

@@ -28,11 +28,20 @@ func (step *Step) Execute(channel chan *Step, _ctx *interface{}) {
 	// Execute the steps
 	step.Status = StepRunning
 
+	err := step.Init()
+	if err != nil {
+		step.Status = StepFail
+		channel <- step
+		return
+	}
+
 	if step.Run(_ctx) != nil {
 		step.Status = StepFail
 	} else {
 		step.Status = StepOK
 	}
+
+	step.Clean()
 
 	channel <- step
 }
