@@ -1,60 +1,18 @@
 package configParser
 
-import "Workflow/docker"
-
 // Workflow File
 
-type WorkflowStep interface {
-}
-
-type StepDockerPersistFormat struct {
-	Name   string
-	Source string
-}
-
-type StepDockerFormat struct {
-	Name      string   `json:"name"`
-	Image     string   `json:"image"`
-	Workdir   string   `json:"workdir,omitempty"`
-	Commands  string   `json:"commands"`
-	DependsOn []string `json:"depends_on,omitempty"`
-	//Env      *map[string]string
-	Persist []StepDockerPersistFormat `json:"persist,omitempty"`
-}
-
-type StepDocker struct {
-	Id        string
-	Name      string
-	Image     string
-	Workdir   string
-	Commands  string
-	DependsOn []string
-	Persist   []StepDockerPersistFormat
-	Volumes   []docker.VolumeConfig
-}
-
-type StepImportedFormat struct {
-	Name      string
-	Workflow  string
-	Env       map[string]string
-	Arguments map[string]string
-}
-
-type WorkflowWorkflowFormat struct {
+type workflowWorkflowFormat struct {
 	Steps []interface{}
 }
 
-type WorkflowFormat struct {
-	Workflow WorkflowWorkflowFormat
-}
-
-type WorkflowFileTemplate struct {
-	Workflow WorkflowWorkflowFormat
+type workflowFileTemplate struct {
+	Workflow workflowWorkflowFormat
 }
 
 // Config file
 
-type ParameterTemplate struct {
+type parameterTemplate struct {
 	Name         string
 	Description  string
 	Validators   string
@@ -71,7 +29,15 @@ const (
 	FloatType                         = "float"
 )
 
-type ConfigTemplate struct {
-	Name       string
-	Parameters []ParameterTemplate
+type importTemplate struct {
+	Name string
+	Url  string
+}
+
+type workflowMetadataTemplate struct {
+	Name        string                       `yaml:"name"`
+	Description string                       `yaml:"description"`
+	Maintainer  string                       `yaml:"maintainer"`
+	Parameters  map[string]parameterTemplate `yaml:"parameters"`
+	Imports     []importTemplate             `yaml:"imports"`
 }

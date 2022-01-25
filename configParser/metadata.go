@@ -6,10 +6,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// LoadMetadata Extract the metadata part of the workflow file
+// loadMetadata Extract the metadata part of the workflow file
 //and check the required field
-func LoadMetadata(fileContent []byte) (*WorkflowMetadataTemplate, error) {
-	metadata := WorkflowMetadataTemplate{}
+func loadMetadata(fileContent []byte) (*workflowMetadataTemplate, error) {
+	metadata := workflowMetadataTemplate{}
 
 	fileReader := bytes.NewReader(fileContent)
 	yamlDecoder := yaml.NewDecoder(fileReader)

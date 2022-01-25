@@ -34,7 +34,7 @@ func DownloadFile(filepath string, url string) error {
 	return err
 }
 
-func ResolveExternalTemplate(tpl ImportTemplate) error {
+func ResolveExternalTemplate(tpl importTemplate) error {
 	fileName := fmt.Sprintf("%s.yml", tpl.Name)
 	filePath := path.Join(templateStorage, fileName)
 

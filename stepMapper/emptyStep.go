@@ -10,7 +10,7 @@ func MakeEmptyStep() workflow.StepDefinition {
 }
 
 func (es *EmptyStep) GetDependencies() []string {
-	panic("implement me")
+	return []string{}
 }
 
 func (es *EmptyStep) Clean() {
