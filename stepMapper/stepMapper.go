@@ -4,6 +4,7 @@ import (
 	"Workflow/configParser"
 	"Workflow/workflow"
 	"fmt"
+	"strings"
 )
 
 func ParseWorkflowSteps(parsedWorkflow configParser.ParsedWorkflow) (*configParser.Runner, error) {
@@ -47,10 +48,11 @@ func buildWorkflow(parsedWorkflow configParser.ParsedWorkflow, stepsDefinitions 
 			step.AddRequirement(initialStep)
 		} else {
 			for _, dep := range deps {
-				if val, ok := stepMapper[dep]; ok {
+				labelDep := strings.ToLower(strings.ReplaceAll(dep, " ", "_"))
+				if val, ok := stepMapper[labelDep]; ok {
 					step.AddRequirement(val)
 				} else {
-					return nil, fmt.Errorf("step %s does not exists", dep)
+					return nil, fmt.Errorf("step %s does not exists", labelDep)
 				}
 			}
 		}

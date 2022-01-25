@@ -29,7 +29,7 @@ workflow:
 
     - name: Execute Python code
       depends_on:
-        - gitclonerepository
+        - GitCloneRepository
       image: python:slim
       workdir: /app
       commands: |
