@@ -1,6 +1,9 @@
 package workflow
 
-import "Workflow/workflow/ctx"
+import (
+	"Workflow/workflow/ctx"
+	"fmt"
+)
 
 type StepStatus uint16
 
@@ -27,17 +30,22 @@ func (step *Step) AddRequirement(parent *Step) {
 }
 
 func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
+	stepContext := ctx.Copy()
+	l := ctx.GetLogger()
+	sl := l.Copy(fmt.Sprintf("[%s]", step.GetLabel()))
+	stepContext.SetLogger(*sl)
+
 	// Execute the steps
 	step.Status = StepRunning
 
-	err := step.Init(ctx)
+	err := step.Init(stepContext)
 	if err != nil {
 		step.Status = StepFail
 		channel <- step
 		return
 	}
 
-	if step.Run(ctx) != nil {
+	if step.Run(stepContext) != nil {
 		step.Status = StepFail
 	} else {
 		step.Status = StepOK

@@ -55,6 +55,11 @@ func (ws *StepWorkflow) Init(ctx ctx.WorkflowContext) error {
 	if err != nil {
 		return fmt.Errorf("fail to parse workflow steps %v", err)
 	}
+
+	parentLogger := ctx.GetLogger()
+	stepLogger := parentLogger.Copy("-")
+	parsedWorkflow.SetLogger(*stepLogger)
+
 	ws.wf = wf
 	ws.innerContext = parsedWorkflow
 

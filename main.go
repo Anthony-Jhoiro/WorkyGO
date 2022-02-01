@@ -4,20 +4,35 @@ import (
 	"Workflow/configParser"
 	"Workflow/logger"
 	"Workflow/stepMapper"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"path"
 	"strconv"
 	"time"
 )
 
 func main() {
 
-	err := logger.LOG.Init(logger.Context{RunName: strconv.FormatInt(time.Now().Unix(), 10)})
+	historyPath := path.Join("./history", fmt.Sprintf("run-%s", strconv.FormatInt(time.Now().Unix(), 16)))
+
+	err := os.MkdirAll(historyPath, os.ModePerm)
 	if err != nil {
-		log.Fatalf("Fail to initialize logger : %v", err)
+		log.Fatalf("can not create run history directory : %v", err)
 	}
 
-	// Open file
+	file, err := os.Create(path.Join(historyPath, "run.log"))
+	defer file.Close()
+
+	l := logger.New("", file)
+
+	//err = logger.LOG.Init(logger.Context{RunName: strconv.FormatInt(time.Now().Unix(), 10)})
+	//if err != nil {
+	//	log.Fatalf("Fail to initialize logger : %v", err)
+	//}
+
+	// Open logFile
 	yfile, err := ioutil.ReadFile("examples/example2/workflow.yaml")
 
 	if err != nil {
@@ -34,6 +49,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	parsedWorkflow.SetLogger(*l)
 
 	workflow, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
 
