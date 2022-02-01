@@ -50,7 +50,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	parsedWorkflow.SetLogger(*l)
+	parsedWorkflow.SetLogger(l)
 
 	workflow, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
 

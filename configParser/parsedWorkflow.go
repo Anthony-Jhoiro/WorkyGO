@@ -14,7 +14,7 @@ type ParsedWorkflow struct {
 	Arguments   string
 	Steps       []interface{}
 	Imports     map[string]string
-	log         logger.InteractiveLogger
+	log         logger.Logger
 }
 
 func (wf *ParsedWorkflow) GetExternalTemplate(tplName string) ([]byte, error) {
@@ -31,11 +31,11 @@ func (wf *ParsedWorkflow) GetExternalTemplate(tplName string) ([]byte, error) {
 	return fileContent, nil
 }
 
-func (wf *ParsedWorkflow) GetLogger() logger.InteractiveLogger {
+func (wf *ParsedWorkflow) GetLogger() logger.Logger {
 	return wf.log
 }
 
-func (wf *ParsedWorkflow) SetLogger(log logger.InteractiveLogger) {
+func (wf *ParsedWorkflow) SetLogger(log logger.Logger) {
 	wf.log = log
 }
 

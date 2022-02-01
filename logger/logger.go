@@ -1,15 +1,22 @@
 package logger
 
-import "io"
+import (
+	"io"
+	"os"
+)
 
 type Context struct {
 	RunName string
 }
 
 type Logger interface {
-	Init(Context) error
-	Log(string, io.Reader) error
-	Debug(string)
+	PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) error
+	Copy(prefixExtension string) *interactiveLogger
 }
 
-var LOG = FileLogger{}
+func New(basePrefix string, stream *os.File) Logger {
+	return &interactiveLogger{
+		prefix: basePrefix,
+		stream: stream,
+	}
+}

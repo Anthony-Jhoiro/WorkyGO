@@ -33,7 +33,7 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	stepContext := ctx.Copy()
 	l := ctx.GetLogger()
 	sl := l.Copy(fmt.Sprintf("[%s]", step.GetLabel()))
-	stepContext.SetLogger(*sl)
+	stepContext.SetLogger(sl)
 
 	// Execute the steps
 	step.Status = StepRunning

@@ -58,7 +58,7 @@ func (ws *StepWorkflow) Init(ctx ctx.WorkflowContext) error {
 
 	parentLogger := ctx.GetLogger()
 	stepLogger := parentLogger.Copy("-")
-	parsedWorkflow.SetLogger(*stepLogger)
+	parsedWorkflow.SetLogger(stepLogger)
 
 	ws.wf = wf
 	ws.innerContext = parsedWorkflow

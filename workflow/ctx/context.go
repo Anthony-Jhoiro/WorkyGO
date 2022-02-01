@@ -4,7 +4,7 @@ import "Workflow/logger"
 
 type WorkflowContext interface {
 	GetExternalTemplate(string) ([]byte, error)
-	GetLogger() logger.InteractiveLogger
-	SetLogger(logger.InteractiveLogger)
+	GetLogger() logger.Logger
+	SetLogger(logger.Logger)
 	Copy() WorkflowContext
 }
