@@ -1,13 +1,12 @@
 package docker
 
 import (
-	"Workflow/logger"
+	"Workflow/workflow/ctx"
 	"context"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"path"
 	"time"
 )
 
@@ -27,7 +26,7 @@ func NewContainer(config *DockerImageConfig, stepId string) (*Container, error) 
 }
 
 // Init initialize the container and its configuration
-func (c *Container) Init() error {
+func (c *Container) Init(ctx ctx.WorkflowContext) error {
 	// Setup Context
 	c.Context = context.Background()
 
@@ -42,7 +41,7 @@ func (c *Container) Init() error {
 	c.Name = RandContainerName()
 
 	// Pull container image
-	err = c.PullImage()
+	err = c.PullImage(ctx)
 	if err != nil {
 		return err
 	}
@@ -59,7 +58,7 @@ func (c *Container) Init() error {
 	return err
 }
 
-func (c *Container) PullImage() error {
+func (c *Container) PullImage(ctx ctx.WorkflowContext) error {
 	// Pull docker image
 	out, err := c.client.ImagePull(c.Context, c.config.image(), types.ImagePullOptions{})
 
@@ -67,7 +66,9 @@ func (c *Container) PullImage() error {
 		panic(err)
 	}
 
-	err = logger.LOG.Log(path.Join("steps", c.StepId, "pull.log"), out)
+	getLogger := ctx.GetLogger()
+	err = getLogger.PrintFormattedReader(0, "PULL - %s", out)
+
 	if err != nil {
 		return fmt.Errorf("fail to redirect logs")
 	}
@@ -76,9 +77,9 @@ func (c *Container) PullImage() error {
 	return err
 }
 
-func (c *Container) Run() error {
+func (c *Container) Run(ctx ctx.WorkflowContext) error {
 
-	err := c.exec()
+	err := c.exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -93,7 +94,7 @@ func (c *Container) Run() error {
 }
 
 // exec execute the main process of the container
-func (c *Container) exec() error {
+func (c *Container) exec(ctx ctx.WorkflowContext) error {
 	// Start the container
 	err := c.client.ContainerStart(c.Context, c.ID, types.ContainerStartOptions{})
 	if err != nil {
@@ -115,7 +116,8 @@ func (c *Container) exec() error {
 		return err
 	}
 
-	err = logger.LOG.Log(path.Join("steps", c.StepId, "run.log"), out)
+	getLogger := ctx.GetLogger()
+	err = getLogger.PrintFormattedReader(8, "%s", out)
 	if err != nil {
 		return fmt.Errorf("fail to redirect logs : %v", err)
 	}

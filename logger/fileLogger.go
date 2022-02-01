@@ -1,69 +1,44 @@
 package logger
 
 import (
+	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
-	"path"
+	"strings"
 )
 
-type FileLogger struct {
-	historyPath string
+type interactiveLogger struct {
+	stream *os.File
+	prefix string
 }
 
-func (fl *FileLogger) Init(ctx Context) error {
-	fl.historyPath = path.Join("./history", fmt.Sprintf("run-%s", ctx.RunName))
+func (il *interactiveLogger) PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) error {
+	bf := bufio.NewReader(reader)
+	line, err := bf.ReadString('\n')
 
-	err := os.MkdirAll(fl.historyPath, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("can not create run history directory : %v", err)
-	}
+	for err == nil {
+		formattedLine := string([]byte(line)[skipBytes:])
+		trimmedLine := strings.Trim(formattedLine, "\n \t\r")
 
-	stepsPath := path.Join(fl.historyPath, "steps")
-
-	err = os.Mkdir(stepsPath, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("can not create steps history directory : %v", err)
-	}
-
-	return nil
-}
-
-func (fl FileLogger) Log(historyRelativePath string, stream io.Reader) error {
-	// Create file if not exists
-	filePath := path.Join(fl.historyPath, historyRelativePath)
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		// Create folder
-		err := os.MkdirAll(path.Dir(filePath), os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("fail to create log directory %v", err)
+		writeError := il.writeLine(fmt.Sprintf(resultFormat, trimmedLine))
+		if writeError != nil {
+			return writeError
 		}
-	}
 
-	// Create file
-	file, err := os.Create(filePath)
-	defer file.Close()
-
-	if err != nil {
-		return fmt.Errorf("fail to open log file %v", err)
-	}
-
-	_, err = file.ReadFrom(stream)
-	if err != nil {
-		return fmt.Errorf("fail to write in log file %v", err)
+		line, err = bf.ReadString('\n')
 	}
 	return nil
 }
 
-func (fl FileLogger) Debug(message string) {
-	f, err := os.OpenFile(path.Join(fl.historyPath, "debug.log"),
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Printf("[WARNING] : Fail to open debug file : %v", err)
-	}
-	defer f.Close()
-	if _, err := f.WriteString(fmt.Sprintf("%s\n", message)); err != nil {
-		log.Printf("[WARNING] : Fail to write into debug file : %v", err)
+func (il *interactiveLogger) writeLine(line string) error {
+	_, err := fmt.Fprintf(il.stream, "%s %s\n", il.prefix, line)
+	return err
+}
+
+func (il *interactiveLogger) Copy(prefixExtension string) *interactiveLogger {
+	return &interactiveLogger{
+		stream: il.stream,
+		prefix: fmt.Sprintf("%s%s", il.prefix, prefixExtension),
 	}
 }

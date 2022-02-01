@@ -72,7 +72,7 @@ func (ds *StepDocker) GetDescription() string {
 	return ""
 }
 
-func (ds *StepDocker) Run(_ ctx.WorkflowContext) error {
+func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 
 	volumes := make([]docker.VolumeConfig, 0, len(ds.Persist))
 
@@ -103,12 +103,12 @@ func (ds *StepDocker) Run(_ ctx.WorkflowContext) error {
 		return fmt.Errorf("fail to create container %v", err)
 	}
 
-	err = container.Init()
+	err = container.Init(ctx)
 	if err != nil {
 		return fmt.Errorf("fail to initialise container %v", err)
 	}
 
-	err = container.Run()
+	err = container.Run(ctx)
 	if err != nil {
 		return fmt.Errorf("fail to run the container %v", err)
 	}
