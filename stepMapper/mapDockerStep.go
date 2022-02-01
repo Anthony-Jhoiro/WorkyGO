@@ -2,6 +2,7 @@ package stepMapper
 
 import (
 	"Workflow/docker"
+	"Workflow/workflow/ctx"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -43,10 +44,15 @@ func MapDockerStep(template interface{}) (*StepDocker, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid docker step")
 	}
+
+	if len(dockerStep.Commands) == 0 {
+		return nil, fmt.Errorf("the attribute 'commands' requires a value")
+	}
+
 	return &dockerStep, nil
 }
 
-func (ds *StepDocker) Init() error {
+func (ds *StepDocker) Init(_ ctx.WorkflowContext) error {
 	return nil
 }
 
@@ -66,7 +72,7 @@ func (ds *StepDocker) GetDescription() string {
 	return ""
 }
 
-func (ds *StepDocker) Run(_ *interface{}) error {
+func (ds *StepDocker) Run(_ ctx.WorkflowContext) error {
 
 	volumes := make([]docker.VolumeConfig, 0, len(ds.Persist))
 

@@ -5,18 +5,9 @@ import (
 	"bytes"
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"log"
 	"strconv"
 	"text/template"
 )
-
-type ParsedWorkflow struct {
-	Name        string
-	Description string
-	Maintainer  string
-	Arguments   string
-	Steps       []interface{}
-}
 
 // ParseWorkflowFile Parse the content of a workflow file with the given arguments
 func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*ParsedWorkflow, error) {
@@ -26,14 +17,9 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Parsed
 		return nil, fmt.Errorf("fail to load metadata : %v", err)
 	}
 
-	if len(metadata.Imports) > 0 {
-		log.Println("[WARNING] : Using external templates can expose your system to several risks.")
-		for _, externalTemplate := range metadata.Imports {
-			err = ResolveExternalTemplate(externalTemplate)
-			if err != nil {
-				return nil, fmt.Errorf("fail to import template : %v", err)
-			}
-		}
+	externalTemplates, err := ResolveExternalTemplates(metadata.Imports)
+	if err != nil {
+		return nil, fmt.Errorf("fail during external templates importation : %v", err)
 	}
 
 	logger.LOG.Debug(fmt.Sprintf("Metadata %v", metadata))
@@ -59,6 +45,7 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Parsed
 		Maintainer:  metadata.Maintainer,
 		Arguments:   "", // TODO : argument is string ???
 		Steps:       format.Workflow.Steps,
+		Imports:     externalTemplates,
 	}, nil
 }
 

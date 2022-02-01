@@ -1,6 +1,9 @@
 package stepMapper
 
-import "Workflow/workflow"
+import (
+	"Workflow/workflow"
+	"Workflow/workflow/ctx"
+)
 
 type EmptyStep struct {
 }
@@ -29,10 +32,10 @@ func (es *EmptyStep) GetDescription() string {
 	return "This is an empty step used to start a workflow."
 }
 
-func (es *EmptyStep) Init() error {
+func (es *EmptyStep) Init(_ ctx.WorkflowContext) error {
 	return nil
 }
 
-func (es *EmptyStep) Run(_ *interface{}) error {
+func (es *EmptyStep) Run(_ ctx.WorkflowContext) error {
 	return nil
 }

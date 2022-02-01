@@ -10,9 +10,9 @@ parameters:
   output:
     type: string
 
-#imports:
-#  - name: git_workflow
-#    url: https://example.com/file.yaml
+imports:
+  - name: hello
+    url: https://raw.githubusercontent.com/Anthony-Jhoiro/sample_git/master/test_action.yml
 ---
 
 workflow:
@@ -37,5 +37,11 @@ workflow:
       persist:
         - name: "{{ index .Parameters "output" }}"
           source: /app
+
+    - name: Say hello
+      workflow: hello
+      parameters:
+        name: Anthony
+
 
 

@@ -80,5 +80,19 @@ func mapMultipleSteps(stepTemplates []interface{}) ([]workflow.StepDefinition, e
 }
 
 func mapStep(tpl interface{}) (workflow.StepDefinition, error) {
-	return MapDockerStep(tpl)
+	var step workflow.StepDefinition
+
+	step, err := MapDockerStep(tpl)
+
+	if err == nil {
+		return step, nil
+	}
+
+	step, err = MapWorkflowStep(tpl)
+
+	if err == nil {
+		return step, nil
+	}
+
+	return nil, fmt.Errorf("invalid step")
 }

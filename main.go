@@ -41,5 +41,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	workflow.Run()
+	workflow.Run(parsedWorkflow)
 }

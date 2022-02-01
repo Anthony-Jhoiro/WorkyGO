@@ -1,5 +1,7 @@
 package workflow
 
+import "Workflow/workflow/ctx"
+
 type StepStatus uint16
 
 type Step struct {
@@ -24,18 +26,18 @@ func (step *Step) AddRequirement(parent *Step) {
 	step.PreviousSteps = append(step.PreviousSteps, parent)
 }
 
-func (step *Step) Execute(channel chan *Step, _ctx *interface{}) {
+func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	// Execute the steps
 	step.Status = StepRunning
 
-	err := step.Init()
+	err := step.Init(ctx)
 	if err != nil {
 		step.Status = StepFail
 		channel <- step
 		return
 	}
 
-	if step.Run(_ctx) != nil {
+	if step.Run(ctx) != nil {
 		step.Status = StepFail
 	} else {
 		step.Status = StepOK
