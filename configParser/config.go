@@ -9,57 +9,48 @@ import (
 	"text/template"
 )
 
-func ParseConfigFileContent(fileContent []byte) (*ConfigTemplate, error) {
-
-	tpl := &ConfigTemplate{}
-	err := yaml.Unmarshal(fileContent, &tpl)
-
-	return tpl, err
-}
-
-type ImportTemplate struct {
-	Name string
-	Url  string
-}
-
-type WorkflowMetadataTemplate struct {
-	Name        string                       `yaml:"name"`
-	Description string                       `yaml:"description"`
-	Maintainer  string                       `yaml:"maintainer"`
-	Parameters  map[string]ParameterTemplate `yaml:"parameters"`
-	Imports     []ImportTemplate             `yaml:"imports"`
-}
-
 // ParseWorkflowFile Parse the content of a workflow file with the given arguments
-func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Runner, error) {
+func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*ParsedWorkflow, error) {
 	// Load the file metadata
-	metadata, err := LoadMetadata(fileContent)
+	metadata, err := loadMetadata(fileContent)
 	if err != nil {
 		return nil, fmt.Errorf("fail to load metadata : %v", err)
+	}
+
+	externalTemplates, err := ResolveExternalTemplates(metadata.Imports)
+	if err != nil {
+		return nil, fmt.Errorf("fail during external templates importation : %v", err)
 	}
 
 	logger.LOG.Debug(fmt.Sprintf("Metadata %v", metadata))
 
 	// Apply arguments to the file
-	workflowArguments, err := metadata.BuildWorkflowArgument(arguments)
+	workflowArguments, err := metadata.buildWorkflowArgument(arguments)
 	if err != nil {
 		return nil, fmt.Errorf("fail to compile workflow parameters : %v", err)
 	}
 
 	logger.LOG.Debug(fmt.Sprintf("Arguments : %v", workflowArguments))
 
-	format, err := DecodeWorkflowFile(fileContent, workflowArguments)
+	format, err := decodeWorkflowFile(fileContent, workflowArguments)
 	if err != nil {
 		return nil, fmt.Errorf("fail to decode workflow : %v", err)
 	}
 
 	logger.LOG.Debug(fmt.Sprintf("Workflow : %v", format))
 
-	return BuildWorkflow(*format, *metadata)
+	return &ParsedWorkflow{
+		Name:        metadata.Name,
+		Description: metadata.Description,
+		Maintainer:  metadata.Maintainer,
+		Arguments:   "", // TODO : argument is string ???
+		Steps:       format.Workflow.Steps,
+		Imports:     externalTemplates,
+	}, nil
 }
 
-// CastParameter Cast a string to the given WorkflowParameterType
-func CastParameter(stringValue string, paramType WorkflowParameterType) (interface{}, error) {
+// castParameter Cast a string to the given WorkflowParameterType
+func castParameter(stringValue string, paramType WorkflowParameterType) (interface{}, error) {
 	switch paramType {
 	case BooleanType:
 		return strconv.ParseBool(stringValue)
@@ -72,8 +63,8 @@ func CastParameter(stringValue string, paramType WorkflowParameterType) (interfa
 	}
 }
 
-// BuildWorkflowArgument creates the attributes map that can be used to
-func (metadata *WorkflowMetadataTemplate) BuildWorkflowArgument(arguments map[string]string) (map[string]interface{}, error) {
+// buildWorkflowArgument creates the attributes map that can be used to
+func (metadata *workflowMetadataTemplate) buildWorkflowArgument(arguments map[string]string) (map[string]interface{}, error) {
 	// Apply parameters to the file
 	workflowArguments := make(map[string]interface{})
 
@@ -88,7 +79,7 @@ func (metadata *WorkflowMetadataTemplate) BuildWorkflowArgument(arguments map[st
 		}
 
 		// Cast to the right type
-		realValue, err := CastParameter(stringValue, v.Type)
+		realValue, err := castParameter(stringValue, v.Type)
 		if err != nil {
 			return nil, fmt.Errorf("fail to cast parameter [%s] with value [%s] to type [%s] : %v", k, stringValue, v.Type, err)
 		}
@@ -100,10 +91,10 @@ func (metadata *WorkflowMetadataTemplate) BuildWorkflowArgument(arguments map[st
 	return workflowArguments, nil
 }
 
-// DecodeWorkflowFile Decode the workflow file using the given context and return the result
-func DecodeWorkflowFile(fileContent []byte, workflowArguments map[string]interface{}) (*WorkflowFileTemplate, error) {
+// decodeWorkflowFile Decode the workflow file using the given context and return the result
+func decodeWorkflowFile(fileContent []byte, workflowArguments map[string]interface{}) (*workflowFileTemplate, error) {
 	// Parse the file with arguments
-	decodedFile, err := ApplyContext(fileContent, workflowArguments)
+	decodedFile, err := applyContext(fileContent, workflowArguments)
 
 	yamlDecoder := yaml.NewDecoder(bytes.NewReader(decodedFile))
 
@@ -113,7 +104,7 @@ func DecodeWorkflowFile(fileContent []byte, workflowArguments map[string]interfa
 		return nil, fmt.Errorf("fail to parse workflow : %v", err)
 	}
 
-	var workflowData WorkflowFileTemplate
+	var workflowData workflowFileTemplate
 
 	err = yamlDecoder.Decode(&workflowData)
 	if err != nil {
@@ -123,9 +114,9 @@ func DecodeWorkflowFile(fileContent []byte, workflowArguments map[string]interfa
 	return &workflowData, nil
 }
 
-// ApplyContext Format the workflow file with the context to decode the go templates.
+// applyContext Format the workflow file with the context to decode the go templates.
 // It returns the decoded file
-func ApplyContext(fileContent []byte, workflowArguments map[string]interface{}) ([]byte, error) {
+func applyContext(fileContent []byte, workflowArguments map[string]interface{}) ([]byte, error) {
 	// Parse the file with arguments
 	tmpl, err := template.New("configParser").Parse(string(fileContent))
 	if err != nil {

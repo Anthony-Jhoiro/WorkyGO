@@ -1,64 +1,26 @@
 package configParser
 
-// Workflow File
+// This file contains all struct definitions to parse the yaml template
 
-type WorkflowStep interface {
+type workflowWorkflowFormat struct {
+	Steps []interface{} `yaml:"steps"`
 }
 
-type StepDockerPersistFormat struct {
-	Name   string
-	Source string
-}
-
-type StepDockerFormat struct {
-	Name      string   `json:"name"`
-	Image     string   `json:"image"`
-	Workdir   string   `json:"workdir,omitempty"`
-	Commands  string   `json:"commands"`
-	DependsOn []string `json:"depends_on,omitempty"`
-	//Env      *map[string]string
-	Persist []StepDockerPersistFormat `json:"persist,omitempty"`
-}
-
-type StepDocker struct {
-	Id        string
-	Name      string
-	Image     string
-	Workdir   string
-	Commands  string
-	DependsOn []string
-	Persist   []StepDockerPersistFormat
-}
-
-type StepImportedFormat struct {
-	Name       string
-	Workflow   string
-	Env        map[string]string
-	Parameters map[string]string
-}
-
-type WorkflowWorkflowFormat struct {
-	Steps []map[string]interface{}
-}
-
-type WorkflowFormat struct {
-	Workflow WorkflowWorkflowFormat
-}
-
-type WorkflowFileTemplate struct {
-	Workflow WorkflowWorkflowFormat
+type workflowFileTemplate struct {
+	Workflow workflowWorkflowFormat `yaml:"workflow"`
 }
 
 // Config file
 
-type ParameterTemplate struct {
-	Name         string
-	Description  string
-	Validators   string
-	DefaultValue string `yaml:"default_value"`
-	Type         WorkflowParameterType
+type parameterTemplate struct {
+	Name         string                `yaml:"name"`
+	Description  string                `yaml:"description,omitempty"`
+	Validators   string                `yaml:"validators,omitempty"`
+	DefaultValue string                `yaml:"default_value" yaml:"default_value"`
+	Type         WorkflowParameterType `yaml:"type"`
 }
 
+// WorkflowParameterType describe the parameter types that can be used in a workflow template
 type WorkflowParameterType string
 
 const (
@@ -68,7 +30,16 @@ const (
 	FloatType                         = "float"
 )
 
-type ConfigTemplate struct {
-	Name       string
-	Parameters []ParameterTemplate
+// importTemplate is the template format that defines an import statement
+type importTemplate struct {
+	Name string `yaml:"name"`
+	Url  string `yaml:"url"`
+}
+
+type workflowMetadataTemplate struct {
+	Name        string                       `yaml:"name"`
+	Description string                       `yaml:"description"`
+	Maintainer  string                       `yaml:"maintainer"`
+	Parameters  map[string]parameterTemplate `yaml:"parameters"`
+	Imports     []importTemplate             `yaml:"imports"`
 }

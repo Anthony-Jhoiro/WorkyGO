@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"Workflow/workflow/ctx"
 	"fmt"
 	"os"
 	"os/exec"
@@ -26,10 +27,10 @@ func (wf *Workflow) Print() {
 	}
 }
 
-func (wf *Workflow) Run() {
+func (wf *Workflow) Run(ctx ctx.WorkflowContext) {
 	channel := make(chan *Step, wf.nodeCount)
 
-	go wf.firstStep.Execute(channel, nil)
+	go wf.firstStep.Execute(channel, ctx)
 
 	for i := 0; i < wf.nodeCount; i++ {
 		closingStep := <-channel
@@ -38,18 +39,14 @@ func (wf *Workflow) Run() {
 			if e.RequirementsFulfilled() {
 				// Execute step
 				go func(executable *Step) {
-					executable.Execute(channel, nil)
+					executable.Execute(channel, ctx)
 				}(e)
 			}
 		}
 
 		cmd := exec.Command("clear") //Linux example, its tested
 		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err != nil {
-			fmt.Printf("Can not clear screen")
-			continue
-		}
+		_ = cmd.Run()
 		wf.Print()
 	}
 }
