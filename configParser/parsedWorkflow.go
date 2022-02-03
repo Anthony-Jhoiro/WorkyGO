@@ -15,6 +15,15 @@ type ParsedWorkflow struct {
 	Steps       []interface{}
 	Imports     map[string]string
 	log         logger.Logger
+	runNumber   string
+}
+
+func (wf *ParsedWorkflow) GetRunNumber() string {
+	return wf.runNumber
+}
+
+func (wf *ParsedWorkflow) SetRunNumber(rn string) {
+	wf.runNumber = rn
 }
 
 func (wf *ParsedWorkflow) GetExternalTemplate(tplName string) ([]byte, error) {

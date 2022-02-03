@@ -25,11 +25,6 @@ type Config struct {
 	entrypointFile *os.File
 }
 
-type DockerfileConfig struct {
-	DockerfileContent string
-	Config
-}
-
 type DockerImageConfig struct {
 	Image   string
 	Command string

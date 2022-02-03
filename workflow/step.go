@@ -35,7 +35,7 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	sl := l.Copy(fmt.Sprintf("[%s]", step.GetLabel()))
 	stepContext.SetLogger(sl)
 
-	// Execute the steps
+	// Execute the Steps
 	step.Status = StepRunning
 
 	err := step.Init(stepContext)
@@ -50,8 +50,6 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	} else {
 		step.Status = StepOK
 	}
-
-	step.Clean()
 
 	channel <- step
 }

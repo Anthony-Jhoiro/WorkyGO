@@ -15,7 +15,9 @@ import (
 
 func main() {
 
-	historyPath := path.Join("./history", fmt.Sprintf("run-%s", strconv.FormatInt(time.Now().Unix(), 16)))
+	runNumber := strconv.FormatInt(time.Now().Unix(), 16)
+
+	historyPath := path.Join("./history", fmt.Sprintf("run-%s", runNumber))
 
 	err := os.MkdirAll(historyPath, os.ModePerm)
 	if err != nil {
@@ -26,11 +28,6 @@ func main() {
 	defer file.Close()
 
 	l := logger.New("", file)
-
-	//err = logger.LOG.Init(logger.Context{RunName: strconv.FormatInt(time.Now().Unix(), 10)})
-	//if err != nil {
-	//	log.Fatalf("Fail to initialize logger : %v", err)
-	//}
 
 	// Open logFile
 	yfile, err := ioutil.ReadFile("examples/example2/workflow.yaml")
@@ -51,6 +48,7 @@ func main() {
 	}
 
 	parsedWorkflow.SetLogger(l)
+	parsedWorkflow.SetRunNumber(runNumber)
 
 	workflow, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
 
@@ -59,4 +57,8 @@ func main() {
 	}
 
 	workflow.Run(parsedWorkflow)
+
+	for _, step := range workflow.Steps {
+		step.Clean()
+	}
 }

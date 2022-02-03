@@ -3,8 +3,11 @@ package stepMapper
 import (
 	"Workflow/docker"
 	"Workflow/workflow/ctx"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/docker/docker/client"
+	"log"
 	"strings"
 )
 
@@ -21,7 +24,8 @@ type StepDocker struct {
 	Commands  string                    `json:"commands"`
 	DependsOn []string                  `json:"depends_on,omitempty"`
 	Persist   []StepDockerPersistFormat `json:"persist,omitempty"`
-	Volumes   []docker.VolumeConfig     `json:"volumes,omitempty"`
+	volumes   []docker.VolumeConfig
+	client    *client.Client
 }
 
 func (ds *StepDocker) GetDependencies() []string {
@@ -52,12 +56,44 @@ func MapDockerStep(template interface{}) (*StepDocker, error) {
 	return &dockerStep, nil
 }
 
-func (ds *StepDocker) Init(_ ctx.WorkflowContext) error {
+func (ds *StepDocker) Init(ctx ctx.WorkflowContext) error {
+	// Map volumes
+	volumes := make([]docker.VolumeConfig, 0, len(ds.Persist))
+
+	for _, v := range ds.Persist {
+		volumes = append(volumes, docker.VolumeConfig{
+			Label:            fmt.Sprintf("wf-%s-%s", v.Name, ctx.GetRunNumber()),
+			ContainerMapping: v.Source,
+			ReadOnly:         false,
+			Persistent:       true,
+		})
+	}
+	ds.volumes = volumes
+
+	// Add docker client
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return fmt.Errorf("fatal : fail to create docker client : %v", err)
+	}
+
+	ds.client = cli
+
 	return nil
 }
 
 func (ds *StepDocker) Clean() {
 
+	c := context.Background()
+
+	for _, volume := range ds.volumes {
+		inspect, err := ds.client.VolumeInspect(c, volume.Label)
+		if err == nil {
+			err := ds.client.VolumeRemove(c, inspect.Name, true)
+			if err != nil {
+				log.Printf("[WARNING] Fail to delete volume [%s] : %v", inspect.Name, err)
+			}
+		}
+	}
 }
 
 func (ds *StepDocker) GetLabel() string {
@@ -74,22 +110,11 @@ func (ds *StepDocker) GetDescription() string {
 
 func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 
-	volumes := make([]docker.VolumeConfig, 0, len(ds.Persist))
-
-	for _, v := range ds.Persist {
-		volumes = append(volumes, docker.VolumeConfig{
-			Label:            v.Name,
-			ContainerMapping: v.Source,
-			ReadOnly:         false,
-			Persistent:       true,
-		})
-	}
-
 	dockerConfig := &docker.DockerImageConfig{
 		Image:   ds.Image,
 		Command: ds.Commands,
 		Config: docker.Config{
-			Volumes:    volumes,
+			Volumes:    ds.volumes,
 			Env:        nil,
 			WorkingDir: "",
 			Entrypoint: "/bin/sh",
