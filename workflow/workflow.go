@@ -3,8 +3,6 @@ package workflow
 import (
 	"Workflow/workflow/ctx"
 	"fmt"
-	"os"
-	"os/exec"
 )
 
 type Workflow struct {
@@ -44,9 +42,5 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) {
 			}
 		}
 
-		cmd := exec.Command("clear") //Linux example, its tested
-		cmd.Stdout = os.Stdout
-		_ = cmd.Run()
-		wf.Print()
 	}
 }
