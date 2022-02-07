@@ -1,0 +1,17 @@
+name: Hello World in python
+description: This workflow is a placeholder for a failing workflow
+
+maintainer: Anthony-Jhoiro
+
+
+---
+
+workflow:
+  steps:
+    - name: Failing Step
+      image: python:alpine3.15
+      executor: /bin/sh -c
+      commands: |
+        exit 1
+
+
