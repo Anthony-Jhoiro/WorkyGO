@@ -7,4 +7,5 @@ type WorkflowContext interface {
 	GetLogger() logger.Logger
 	SetLogger(logger.Logger)
 	Copy() WorkflowContext
+	GetRunNumber() string
 }

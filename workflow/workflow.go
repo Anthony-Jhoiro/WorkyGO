@@ -3,26 +3,24 @@ package workflow
 import (
 	"Workflow/workflow/ctx"
 	"fmt"
-	"os"
-	"os/exec"
 )
 
 type Workflow struct {
 	nodeCount int
 	firstStep *Step
-	steps     []*Step
+	Steps     []*Step
 }
 
 func NewWorkflow(firstStep *Step, steps []*Step) *Workflow {
 	return &Workflow{
 		nodeCount: len(steps),
 		firstStep: firstStep,
-		steps:     steps,
+		Steps:     steps,
 	}
 }
 
 func (wf *Workflow) Print() {
-	for _, step := range wf.steps {
+	for _, step := range wf.Steps {
 		fmt.Printf("[ %s ] => %s \n", step.GetLabel(), step.Status.GetName())
 	}
 }
@@ -44,9 +42,5 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) {
 			}
 		}
 
-		cmd := exec.Command("clear") //Linux example, its tested
-		cmd.Stdout = os.Stdout
-		_ = cmd.Run()
-		wf.Print()
 	}
 }
