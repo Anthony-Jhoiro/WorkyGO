@@ -10,7 +10,7 @@ type Context struct {
 }
 
 type Logger interface {
-	PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) error
+	PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) (map[string]string, error)
 	Print(string) error
 	Copy(prefixExtension string) *interactiveLogger
 	Clean()

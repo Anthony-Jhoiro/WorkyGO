@@ -8,6 +8,10 @@ import (
 type EmptyStep struct {
 }
 
+func (es *EmptyStep) GetOutput() map[string]string {
+	return map[string]string{}
+}
+
 func MakeEmptyStep() workflow.StepDefinition {
 	return &EmptyStep{}
 }
@@ -32,7 +36,7 @@ func (es *EmptyStep) GetDescription() string {
 	return "This is an empty step used to start a workflow."
 }
 
-func (es *EmptyStep) Init(_ ctx.WorkflowContext) error {
+func (es *EmptyStep) Init(_ ctx.WorkflowContext, _ map[string]map[string]string) error {
 	return nil
 }
 

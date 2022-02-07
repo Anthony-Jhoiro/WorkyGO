@@ -32,7 +32,7 @@ func (step *Step) AddRequirement(parent *Step) {
 	step.PreviousSteps = append(step.PreviousSteps, parent)
 }
 
-func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
+func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext, previousStepsOutput map[string]map[string]string) {
 	// The step must be written in the channel at the end of the function
 	defer func() {
 		channel <- step
@@ -47,7 +47,7 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	step.Status = StepRunning
 	_ = stepContext.GetLogger().Print(fmt.Sprintf("Starting %s", step.GetLabel()))
 
-	err := step.Init(stepContext)
+	err := step.Init(stepContext, previousStepsOutput)
 	if err != nil {
 		step.Status = StepFail
 		return

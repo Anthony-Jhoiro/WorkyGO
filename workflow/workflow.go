@@ -29,13 +29,16 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) error {
 	channel := make(chan *Step, wf.nodeCount)
 	runningSteps := 1
 
+	stepsOutput := make(map[string]map[string]string)
+
 	errStack := make([]string, 0, len(wf.Steps))
 
-	go wf.firstStep.Execute(channel, ctx)
+	go wf.firstStep.Execute(channel, ctx, stepsOutput)
 
 	for runningSteps != 0 {
 		closingStep := <-channel
 		runningSteps -= 1
+		stepsOutput[closingStep.GetLabel()] = closingStep.GetOutput()
 
 		if closingStep.Status == StepFail {
 			errStack = append(errStack, closingStep.GetLabel())
@@ -53,7 +56,7 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) error {
 				}(e)
 			} else if requirementsOk {
 				go func(executable *Step) {
-					executable.Execute(channel, ctx)
+					executable.Execute(channel, ctx, stepsOutput)
 				}(e)
 			}
 		}

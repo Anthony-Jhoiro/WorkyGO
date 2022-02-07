@@ -11,7 +11,6 @@ type ParsedWorkflow struct {
 	Name        string
 	Description string
 	Maintainer  string
-	Arguments   string
 	Steps       []interface{}
 	Imports     map[string]string
 	log         logger.Logger
@@ -53,7 +52,6 @@ func (wf *ParsedWorkflow) Copy() ctx.WorkflowContext {
 		Name:        wf.Name,
 		Description: wf.Description,
 		Maintainer:  wf.Maintainer,
-		Arguments:   wf.Arguments,
 		Steps:       wf.Steps,
 		Imports:     wf.Imports,
 		log:         wf.log,

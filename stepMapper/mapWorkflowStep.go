@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"text/template"
 )
 
 type StepWorkflow struct {
@@ -42,7 +43,26 @@ func MapWorkflowStep(template interface{}) (*StepWorkflow, error) {
 	return &workflowStep, nil
 }
 
-func (ws *StepWorkflow) Init(ctx ctx.WorkflowContext) error {
+func (ws *StepWorkflow) resolveStepValues(previousStepsOutput map[string]map[string]string) error {
+	parser := template.New("parser").Funcs(template.FuncMap{"getVar": getOutputParser(previousStepsOutput)})
+
+	for key, parameter := range ws.Parameters {
+		err := _resolveStepValue(parser, &parameter)
+		if err != nil {
+			return fmt.Errorf("fail to parse parameter %s : %v", key, err)
+		}
+	}
+
+	return nil
+}
+
+func (ws *StepWorkflow) Init(ctx ctx.WorkflowContext, previousStepsOutput map[string]map[string]string) error {
+
+	err := ws.resolveStepValues(previousStepsOutput)
+	if err != nil {
+		return fmt.Errorf("fail to parse some values : %v", err)
+	}
+
 	fileContent, err := ctx.GetExternalTemplate(ws.Workflow)
 
 	parsedWorkflow, err := configParser.ParseWorkflowFile(fileContent, ws.Parameters)
@@ -84,4 +104,8 @@ func (ws *StepWorkflow) GetDescription() string {
 
 func (ws *StepWorkflow) Run(_ ctx.WorkflowContext) error {
 	return ws.wf.Run(ws.innerContext)
+}
+
+func (ws *StepWorkflow) GetOutput() map[string]string {
+	return map[string]string{}
 }
