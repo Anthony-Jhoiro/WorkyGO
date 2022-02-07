@@ -48,4 +48,5 @@ type configInterface interface {
 	getDockerVolumes() []mount.Mount // return the list of volumes that needs to be mounted into the container
 	initialize(c Container) error    // initialize function of the configuration, run during the initialisation of the container, before its creation
 	destroy() error                  // destroy function of the configuration that will be called during the container destruction
+	getEntrypoint() []string
 }

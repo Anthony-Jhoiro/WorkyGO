@@ -24,6 +24,7 @@ type StepDocker struct {
 	Commands  string                    `json:"commands"`
 	DependsOn []string                  `json:"depends_on,omitempty"`
 	Persist   []StepDockerPersistFormat `json:"persist,omitempty"`
+	Executor  string                    `json:"executor,omitempty"`
 	volumes   []docker.VolumeConfig
 	client    *client.Client
 }
@@ -110,6 +111,11 @@ func (ds *StepDocker) GetDescription() string {
 
 func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 
+	executor := "/bin/sh -c"
+	if len(ds.Executor) > 0 {
+		executor = ds.Executor
+	}
+
 	dockerConfig := &docker.DockerImageConfig{
 		Image:   ds.Image,
 		Command: ds.Commands,
@@ -117,7 +123,7 @@ func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 			Volumes:    ds.volumes,
 			Env:        nil,
 			WorkingDir: "",
-			Entrypoint: "/bin/sh",
+			Entrypoint: executor,
 			Name:       "tata",
 			Commands:   []string{ds.Commands},
 		},

@@ -5,6 +5,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 // getEnvVars Create a lists of formatted env vars usable to create a container
@@ -97,4 +98,8 @@ func (d *Config) getWorkingDirectory() string {
 		return "/app"
 	}
 	return d.WorkingDir
+}
+
+func (d *Config) getEntrypoint() []string {
+	return strings.Split(d.Entrypoint, " ")
 }

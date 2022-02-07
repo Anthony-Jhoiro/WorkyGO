@@ -13,7 +13,7 @@ func createContainer(c Container) (container.ContainerCreateCreatedBody, error) 
 		Env:          c.config.getEnvVars(),
 		Image:        c.config.image(),
 		WorkingDir:   c.config.getWorkingDirectory(),
-		Entrypoint:   []string{"/bin/sh", "-c", "/entrypoint/entrypoint.sh"},
+		Entrypoint:   append(c.config.getEntrypoint(), "/entrypoint/entrypoint.sh"),
 		StopSignal:   "", // Work with that
 		StopTimeout:  c.config.getTimeout(),
 	}, &container.HostConfig{
