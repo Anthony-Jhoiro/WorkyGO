@@ -25,22 +25,43 @@ func (wf *Workflow) Print() {
 	}
 }
 
-func (wf *Workflow) Run(ctx ctx.WorkflowContext) {
+func (wf *Workflow) Run(ctx ctx.WorkflowContext) error {
 	channel := make(chan *Step, wf.nodeCount)
+	runningSteps := 1
+
+	errStack := make([]string, 0, len(wf.Steps))
 
 	go wf.firstStep.Execute(channel, ctx)
 
-	for i := 0; i < wf.nodeCount; i++ {
+	for runningSteps != 0 {
 		closingStep := <-channel
+		runningSteps -= 1
 
+		if closingStep.Status == StepFail {
+			errStack = append(errStack, closingStep.GetLabel())
+		}
+
+		// Mark following steps as failed
 		for _, e := range closingStep.NextSteps {
-			if e.RequirementsFulfilled() {
-				// Execute step
+
+			requirementsOk, err := e.RequirementsFulfilled()
+			runningSteps += 1
+
+			if err != nil {
+				go func(executable *Step) {
+					executable.fail(channel)
+				}(e)
+			} else if requirementsOk {
 				go func(executable *Step) {
 					executable.Execute(channel, ctx)
 				}(e)
 			}
 		}
-
 	}
+
+	if len(errStack) != 0 {
+		return fmt.Errorf("some step failed : %v", errStack)
+	}
+	return nil
+
 }

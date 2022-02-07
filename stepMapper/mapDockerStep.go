@@ -124,7 +124,7 @@ func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 			Env:        nil,
 			WorkingDir: "",
 			Entrypoint: executor,
-			Name:       "tata",
+			Name:       ds.Name,
 			Commands:   []string{ds.Commands},
 		},
 	}

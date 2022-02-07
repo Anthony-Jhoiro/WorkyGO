@@ -83,7 +83,5 @@ func (ws *StepWorkflow) GetDescription() string {
 }
 
 func (ws *StepWorkflow) Run(_ ctx.WorkflowContext) error {
-
-	ws.wf.Run(ws.innerContext)
-	return nil
+	return ws.wf.Run(ws.innerContext)
 }
