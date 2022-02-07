@@ -5,22 +5,13 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"Workflow/configParser"
-	"Workflow/logger"
-	"Workflow/stepMapper"
+	"Workflow/run"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"os/exec"
-	"path"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"strings"
 )
 
 var LiveMode bool
@@ -64,86 +55,7 @@ var runCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		runNumber := strconv.FormatInt(time.Now().Unix(), 16)
-
-		// Configure logger
-		var l logger.Logger
-
-		if !LiveMode {
-			l = logger.New("", os.Stdout)
-		} else {
-
-			historyPath := path.Join("./history", fmt.Sprintf("run-%s", runNumber))
-
-			err := os.MkdirAll(historyPath, os.ModePerm)
-			if err != nil {
-				log.Fatalf("can not create run history directory : %v", err)
-			}
-
-			file, err := os.Create(path.Join(historyPath, "run.log"))
-			defer file.Close()
-			l = logger.New("", file)
-		}
-
-		// Open logFile
-		yfile, err := ioutil.ReadFile(args[0])
-
-		if err != nil {
-
-			log.Fatal(err)
-		}
-
-		//arguments := make(map[string]string)
-
-		for _, argument := range CLIArguments {
-			slicedString := strings.SplitN(argument, "=", 2)
-			arguments[slicedString[0]] = slicedString[1]
-		}
-
-		parsedWorkflow, err := configParser.ParseWorkflowFile(yfile, arguments)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		parsedWorkflow.SetLogger(l)
-		parsedWorkflow.SetRunNumber(runNumber)
-
-		workflow, err := stepMapper.ParseWorkflowSteps(*parsedWorkflow)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if LiveMode {
-			signals := make(chan bool)
-
-			go func() {
-				loop := true
-				for loop {
-					select {
-					case <-signals:
-						loop = false
-					default:
-
-					}
-					cmd := exec.Command("clear") //Linux example, its tested
-					cmd.Stdout = os.Stdout
-					_ = cmd.Run()
-					workflow.Print()
-					time.Sleep(1 * time.Second)
-				}
-
-			}()
-			workflow.Run(parsedWorkflow)
-
-			signals <- true
-		} else {
-			workflow.Run(parsedWorkflow)
-		}
-
-		for _, step := range workflow.Steps {
-			step.Clean()
-		}
+		run.Run(args[0], arguments, LiveMode)
 	},
 }
 

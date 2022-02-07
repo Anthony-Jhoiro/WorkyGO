@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
@@ -40,5 +41,12 @@ func (il *interactiveLogger) Copy(prefixExtension string) *interactiveLogger {
 	return &interactiveLogger{
 		stream: il.stream,
 		prefix: fmt.Sprintf("%s%s", il.prefix, prefixExtension),
+	}
+}
+
+func (il *interactiveLogger) Clean() {
+	err := il.stream.Close()
+	if err != nil {
+		log.Printf("[WARNING] fail to close the log file : %v\n", err)
 	}
 }
