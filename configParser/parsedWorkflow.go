@@ -57,5 +57,6 @@ func (wf *ParsedWorkflow) Copy() ctx.WorkflowContext {
 		Steps:       wf.Steps,
 		Imports:     wf.Imports,
 		log:         wf.log,
+		runNumber:   wf.runNumber,
 	}
 }

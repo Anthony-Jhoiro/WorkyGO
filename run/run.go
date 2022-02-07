@@ -42,18 +42,24 @@ func Run(filename string, arguments map[string]string, liveMode bool) {
 		log.Fatal(err)
 	}
 
+	var wfError error
+
 	if liveMode {
 		signals := make(chan bool)
 
 		go liveLogWorkflow(signals, wf)
-		wf.Run(parsedWorkflow)
+		wfError = wf.Run(parsedWorkflow)
 
 		signals <- true
 	} else {
-		wf.Run(parsedWorkflow)
+		wfError = wf.Run(parsedWorkflow)
 	}
 
 	cleanWorkflowSteps(wf)
+
+	if wfError != nil {
+		log.Fatal(wfError)
+	}
 
 }
 

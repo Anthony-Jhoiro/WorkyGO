@@ -79,18 +79,15 @@ func (c *Container) PullImage(ctx ctx.WorkflowContext) error {
 
 func (c *Container) Run(ctx ctx.WorkflowContext) error {
 
-	err := c.exec(ctx)
-	if err != nil {
-		return err
-	}
+	execErr := c.exec(ctx)
 
 	// Clean the process
-	err = c.clear()
-	if err != nil {
-		return err
+	clearErr := c.clear()
+	if clearErr != nil {
+		return clearErr
 	}
 
-	return nil
+	return execErr
 }
 
 // exec execute the main process of the container
@@ -129,7 +126,10 @@ func (c *Container) exec(ctx ctx.WorkflowContext) error {
 		if err != nil {
 			return err
 		}
-	case <-statusCh:
+	case a := <-statusCh:
+		if a.StatusCode != 0 {
+			return fmt.Errorf("step failed with status %d", a.StatusCode)
+		}
 	}
 	return nil
 

@@ -15,13 +15,16 @@ type Step struct {
 }
 
 // RequirementsFulfilled Check if all requirements steps have been completed by checking there status.
-func (step *Step) RequirementsFulfilled() bool {
+func (step *Step) RequirementsFulfilled() (bool, error) {
 	for _, requirement := range step.PreviousSteps {
+		if requirement.Status == StepFail {
+			return true, fmt.Errorf("a requirement of step %s failed", step.GetLabel())
+		}
 		if requirement.Status != StepOK {
-			return false
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
 }
 
 func (step *Step) AddRequirement(parent *Step) {
@@ -30,6 +33,11 @@ func (step *Step) AddRequirement(parent *Step) {
 }
 
 func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
+	// The step must be written in the channel at the end of the function
+	defer func() {
+		channel <- step
+	}()
+
 	stepContext := ctx.Copy()
 	l := ctx.GetLogger()
 	sl := l.Copy(fmt.Sprintf("[%s]", step.GetLabel()))
@@ -42,7 +50,6 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	err := step.Init(stepContext)
 	if err != nil {
 		step.Status = StepFail
-		channel <- step
 		return
 	}
 
@@ -53,8 +60,10 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext) {
 	} else {
 		step.Status = StepOK
 		_ = stepContext.GetLogger().Print(fmt.Sprintf("Step %s succeeded", step.GetLabel()))
-
 	}
+}
 
+func (step *Step) fail(channel chan *Step) {
+	step.Status = StepFail
 	channel <- step
 }
