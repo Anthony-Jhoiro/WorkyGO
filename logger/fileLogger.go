@@ -50,3 +50,7 @@ func (il *interactiveLogger) Clean() {
 		log.Printf("[WARNING] fail to close the log file : %v\n", err)
 	}
 }
+
+func (il *interactiveLogger) Print(message string) error {
+	return il.writeLine(message)
+}

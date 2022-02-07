@@ -11,6 +11,7 @@ type Context struct {
 
 type Logger interface {
 	PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) error
+	Print(string) error
 	Copy(prefixExtension string) *interactiveLogger
 	Clean()
 }
