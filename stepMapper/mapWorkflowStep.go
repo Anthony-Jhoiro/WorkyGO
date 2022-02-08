@@ -16,8 +16,10 @@ type StepWorkflow struct {
 	Workflow     string            `json:"workflow"`
 	Parameters   map[string]string `json:"parameters,omitempty"`
 	DependsOn    []string          `json:"depends_on,omitempty"`
+	outputs      map[string]string
 	wf           *workflow.Workflow
 	innerContext ctx.WorkflowContext
+	outputValues map[string]string
 }
 
 func (ws *StepWorkflow) GetDependencies() []string {
@@ -72,6 +74,8 @@ func (ws *StepWorkflow) Init(ctx ctx.WorkflowContext, previousStepsOutput map[st
 
 	wf, err := ParseWorkflowSteps(*parsedWorkflow)
 
+	ws.outputs = parsedWorkflow.Output
+
 	if err != nil {
 		return fmt.Errorf("fail to parse workflow steps %v", err)
 	}
@@ -103,9 +107,34 @@ func (ws *StepWorkflow) GetDescription() string {
 }
 
 func (ws *StepWorkflow) Run(_ ctx.WorkflowContext) error {
-	return ws.wf.Run(ws.innerContext)
+	output, err := ws.wf.Run(ws.innerContext)
+
+	if err != nil {
+		return err
+	}
+
+	parser := getOutputParser(output)
+
+	ov := make(map[string]string)
+
+	for outputName, key := range ws.outputs {
+		slicedKey := strings.Split(key, ".")
+
+		if len(slicedKey) != 2 {
+			return fmt.Errorf("output key %s is malformed", key)
+		}
+		value, err := parser(slicedKey[0], slicedKey[1])
+		if err != nil {
+			return fmt.Errorf("no value founded for key %s : %v", key, err)
+
+		}
+		ov[outputName] = value
+	}
+
+	ws.outputValues = ov
+	return nil
 }
 
 func (ws *StepWorkflow) GetOutput() map[string]string {
-	return map[string]string{}
+	return ws.outputValues
 }

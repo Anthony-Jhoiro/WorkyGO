@@ -25,7 +25,7 @@ func (wf *Workflow) Print() {
 	}
 }
 
-func (wf *Workflow) Run(ctx ctx.WorkflowContext) error {
+func (wf *Workflow) Run(ctx ctx.WorkflowContext) (map[string]map[string]string, error) {
 	channel := make(chan *Step, wf.nodeCount)
 	runningSteps := 1
 
@@ -63,8 +63,8 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) error {
 	}
 
 	if len(errStack) != 0 {
-		return fmt.Errorf("some step failed : %v", errStack)
+		return nil, fmt.Errorf("some step failed : %v", errStack)
 	}
-	return nil
+	return stepsOutput, nil
 
 }

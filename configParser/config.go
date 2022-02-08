@@ -38,6 +38,7 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Parsed
 		Maintainer:  metadata.Maintainer,
 		Steps:       format.Workflow.Steps,
 		Imports:     externalTemplates,
+		Output:      metadata.Output,
 	}, nil
 }
 

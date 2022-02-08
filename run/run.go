@@ -12,8 +12,25 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 )
+
+func getOutputParser(output map[string]map[string]string) func(string, string) (string, error) {
+	return func(stepName, varName string) (string, error) {
+		step, ok := output[stepName]
+		if !ok {
+			return "", fmt.Errorf("step %s not found", stepName)
+		}
+
+		value, ok := step[varName]
+		if !ok {
+			return "", fmt.Errorf("output value %s not found", varName)
+		}
+
+		return value, nil
+	}
+}
 
 func Run(filename string, arguments map[string]string, liveMode bool) {
 	runNumber := strconv.FormatInt(time.Now().Unix(), 16)
@@ -44,18 +61,42 @@ func Run(filename string, arguments map[string]string, liveMode bool) {
 
 	var wfError error
 
+	var output map[string]map[string]string
+
 	if liveMode {
 		signals := make(chan bool)
 
 		go liveLogWorkflow(signals, wf)
-		wfError = wf.Run(parsedWorkflow)
+		output, wfError = wf.Run(parsedWorkflow)
 
 		signals <- true
 	} else {
-		wfError = wf.Run(parsedWorkflow)
+		output, wfError = wf.Run(parsedWorkflow)
 	}
 
 	cleanWorkflowSteps(wf)
+
+	parser := getOutputParser(output)
+
+	ov := make(map[string]string)
+
+	for outputName, key := range parsedWorkflow.Output {
+		slicedKey := strings.Split(key, ".")
+
+		if len(slicedKey) != 2 {
+			log.Fatalf("output key %s is malformed", key)
+		}
+		value, err := parser(slicedKey[0], slicedKey[1])
+		if err != nil {
+			log.Fatalf("no value founded for key %s : %v", key, err)
+
+		}
+		ov[outputName] = value
+	}
+
+	for key, value := range ov {
+		_ = l.Print(fmt.Sprintf("%s => %s", key, value))
+	}
 
 	if wfError != nil {
 		log.Fatal(wfError)

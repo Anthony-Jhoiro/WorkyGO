@@ -13,6 +13,7 @@ type ParsedWorkflow struct {
 	Maintainer  string
 	Steps       []interface{}
 	Imports     map[string]string
+	Output      map[string]string
 	log         logger.Logger
 	runNumber   string
 }

@@ -50,12 +50,13 @@ func (step *Step) Execute(channel chan *Step, ctx ctx.WorkflowContext, previousS
 	err := step.Init(stepContext, previousStepsOutput)
 	if err != nil {
 		step.Status = StepFail
+		_ = stepContext.GetLogger().Print(fmt.Sprintf("[ERROR] Step %s initialization failed : %v", step.GetLabel(), err))
 		return
 	}
 
-	if step.Run(stepContext) != nil {
+	if err = step.Run(stepContext); err != nil {
 		step.Status = StepFail
-		_ = stepContext.GetLogger().Print(fmt.Sprintf("[ERROR] Step %s failed", step.GetLabel()))
+		_ = stepContext.GetLogger().Print(fmt.Sprintf("[ERROR] Step %s failed : %v", step.GetLabel(), err))
 
 	} else {
 		step.Status = StepOK
