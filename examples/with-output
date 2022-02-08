@@ -1,0 +1,22 @@
+name: This workflow is used to test ouputs
+description: This workflow shows that a workflow can return outputs
+
+maintainer: Anthony-Jhoiro
+
+output:
+  wfname: create-output.name
+
+
+---
+
+workflow:
+  steps:
+    - name: create-output
+      image: python:alpine3.15
+      workdir: /app
+      executor: python3
+      commands: |
+        
+        print("::output::name::Anthony::")
+
+
