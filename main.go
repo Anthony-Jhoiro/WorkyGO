@@ -5,7 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package main
 
 import (
-	"Workflow/cmd"
+	"github.com/Anthony-Jhoiro/WorkyGO/cmd"
 )
 
 func main() {

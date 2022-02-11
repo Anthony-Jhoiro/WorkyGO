@@ -1,11 +1,11 @@
 package stepMapper
 
 import (
-	"Workflow/configParser"
-	"Workflow/workflow"
-	"Workflow/workflow/ctx"
 	"encoding/json"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/configParser"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow/ctx"
 	"strings"
 )
 

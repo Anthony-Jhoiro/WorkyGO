@@ -16,4 +16,4 @@ FROM docker:dind
 COPY --from=builder /wf .
 
 
-CMD [ "./wf" ]
+ENTRYPOINT [ "./wf" ]

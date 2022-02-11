@@ -1,9 +1,9 @@
 package configParser
 
 import (
-	"Workflow/logger"
-	"Workflow/workflow/ctx"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/logger"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow/ctx"
 	"io/ioutil"
 )
 

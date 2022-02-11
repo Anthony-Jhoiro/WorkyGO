@@ -1,8 +1,8 @@
 package workflow
 
 import (
-	"Workflow/workflow/ctx"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow/ctx"
 )
 
 type StepStatus uint16

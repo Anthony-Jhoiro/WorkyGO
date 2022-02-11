@@ -1,4 +1,4 @@
-module Workflow
+module github.com/Anthony-Jhoiro/WorkyGO
 
 go 1.17
 

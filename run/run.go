@@ -1,11 +1,11 @@
 package run
 
 import (
-	"Workflow/configParser"
-	"Workflow/logger"
-	"Workflow/stepMapper"
-	"Workflow/workflow"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/configParser"
+	"github.com/Anthony-Jhoiro/WorkyGO/logger"
+	"github.com/Anthony-Jhoiro/WorkyGO/stepMapper"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow"
 	"io/ioutil"
 	"log"
 	"os"

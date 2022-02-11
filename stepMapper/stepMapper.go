@@ -1,9 +1,9 @@
 package stepMapper
 
 import (
-	"Workflow/configParser"
-	"Workflow/workflow"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/configParser"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow"
 	"strings"
 )
 
