@@ -35,6 +35,7 @@ Type of the parameter, the supported types are :
 ##### `imports` (list)
 List of external templates used in the definition part. They can be used to split your workflow into multiple smaller workflows. 
 
+
 > WARNING : The usage of template can expose your system to several risks, use them with precaution.
 
 ##### `imports`/`name` (string)
@@ -43,7 +44,13 @@ Name of the workflow, the name will be used to reference the workflow later in t
 ##### `imports`/`url` (string)
 Url of the file to import. 
 
+
 > Tip : If the template that you want to import is located in a GitHub repository, you can use `githubusercontent.com` to access it.
 
 
 ### Definition
+
+#### `workflow`/`steps` (list)
+List of the different steps tht compose the workflow. At the moment there are 2 type of steps :
+- [Docker step](docker-step.md)
+

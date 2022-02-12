@@ -1,8 +1,8 @@
 package stepMapper
 
 import (
-	"Workflow/workflow"
-	"Workflow/workflow/ctx"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow/ctx"
 )
 
 type EmptyStep struct {

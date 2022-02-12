@@ -5,10 +5,10 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"Workflow/run"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/run"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"strings"

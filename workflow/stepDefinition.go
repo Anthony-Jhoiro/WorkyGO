@@ -1,6 +1,6 @@
 package workflow
 
-import "Workflow/workflow/ctx"
+import "github.com/Anthony-Jhoiro/WorkyGO/workflow/ctx"
 
 type StepDefinition interface {
 	Init(ctx ctx.WorkflowContext, previousStepsOutput map[string]map[string]string) error

@@ -1,0 +1,22 @@
+name: Clone a Git Repository
+description: Clone a Git Repository and place the content in a volume.
+
+maintainer: Anthony-Jhoiro
+
+parameters:
+  repository_url:
+    type: string
+
+  output_volume:
+    type: string
+---
+
+workflow:
+  steps:
+    - name: GitCloneRepository
+      image: alpine/git:v2.32.0
+      workdir: /repo
+      commands: git clone {{ index .Parameters "repository_url" }} .
+      persist:
+        - name: "{{ index .Parameters "output_volume" }}"
+          source: /repo

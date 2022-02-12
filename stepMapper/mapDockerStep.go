@@ -1,12 +1,12 @@
 package stepMapper
 
 import (
-	"Workflow/docker"
-	"Workflow/workflow/ctx"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Anthony-Jhoiro/WorkyGO/docker"
+	"github.com/Anthony-Jhoiro/WorkyGO/workflow/ctx"
 	"github.com/docker/docker/client"
 	"log"
 	"strings"
