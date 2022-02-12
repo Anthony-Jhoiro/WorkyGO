@@ -23,8 +23,6 @@ workflow:
     - name: GitCloneRepository
       image: alpine/git:v2.32.0
       workdir: /app
-      depends_on:
-        - fail
       commands: |
         echo Hello World !
         git clone {{ index .Parameters "git_repo" }} .
@@ -45,13 +43,9 @@ workflow:
 
     - name: Say hello
       workflow: hello
-      depends_on:
-        - fail
       parameters:
         name: Anthony
 
-    - name: Fail
-      workflow: fail
 
 
 

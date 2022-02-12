@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -14,22 +15,35 @@ type interactiveLogger struct {
 	prefix string
 }
 
-func (il *interactiveLogger) PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) error {
+func (il *interactiveLogger) PrintFormattedReader(skipBytes int, resultFormat string, reader io.Reader) (map[string]string, error) {
 	bf := bufio.NewReader(reader)
 	line, err := bf.ReadString('\n')
+
+	reg := regexp.MustCompile("^::output::([a-zA-Z]+)::(.*)::$")
+	output := make(map[string]string)
 
 	for err == nil {
 		formattedLine := string([]byte(line)[skipBytes:])
 		trimmedLine := strings.Trim(formattedLine, "\n \t\r")
 
+		// search for output
+		submatchs := reg.FindStringSubmatch(trimmedLine)
+
+		if submatchs != nil {
+			varName := submatchs[1]
+			value := submatchs[2]
+
+			output[varName] = value
+		}
+
 		writeError := il.writeLine(fmt.Sprintf(resultFormat, trimmedLine))
 		if writeError != nil {
-			return writeError
+			return nil, writeError
 		}
 
 		line, err = bf.ReadString('\n')
 	}
-	return nil
+	return output, nil
 }
 
 func (il *interactiveLogger) writeLine(line string) error {

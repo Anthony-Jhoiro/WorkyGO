@@ -1,0 +1,30 @@
+name: This workflow use the arg
+description: This workflow shows that a step can be used with any runtime
+
+maintainer: Anthony-Jhoiro
+
+output:
+  wfname: create-output.name
+
+
+---
+
+workflow:
+  steps:
+    - name: create-output
+      image: python:alpine3.15
+      workdir: /app
+      executor: python3
+      commands: |
+        print("::output::name::Anthony::")
+
+    - name: use-output
+      image: python:alpine3.15
+      workdir: /app
+      executor: python3
+      depends_on:
+        - create-output
+      commands: |
+        print("Hello {{ getVar "create-output" "name" }}")
+
+

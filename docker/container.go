@@ -67,8 +67,7 @@ func (c *Container) PullImage(ctx ctx.WorkflowContext) error {
 	}
 
 	getLogger := ctx.GetLogger()
-	err = getLogger.PrintFormattedReader(0, "PULL - %s", out)
-
+	_, err = getLogger.PrintFormattedReader(0, "PULL - %s", out)
 	if err != nil {
 		return fmt.Errorf("fail to redirect logs")
 	}
@@ -77,25 +76,25 @@ func (c *Container) PullImage(ctx ctx.WorkflowContext) error {
 	return err
 }
 
-func (c *Container) Run(ctx ctx.WorkflowContext) error {
+func (c *Container) Run(ctx ctx.WorkflowContext) (map[string]string, error) {
 
-	execErr := c.exec(ctx)
+	output, execErr := c.exec(ctx)
 
 	// Clean the process
 	clearErr := c.clear()
 	if clearErr != nil {
-		return clearErr
+		return nil, clearErr
 	}
 
-	return execErr
+	return output, execErr
 }
 
 // exec execute the main process of the container
-func (c *Container) exec(ctx ctx.WorkflowContext) error {
+func (c *Container) exec(ctx ctx.WorkflowContext) (map[string]string, error) {
 	// Start the container
 	err := c.client.ContainerStart(c.Context, c.ID, types.ContainerStartOptions{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Redirect the container logs to the logger file
@@ -110,13 +109,13 @@ func (c *Container) exec(ctx ctx.WorkflowContext) error {
 		Details:    false,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	getLogger := ctx.GetLogger()
-	err = getLogger.PrintFormattedReader(8, "%s", out)
+	output, err := getLogger.PrintFormattedReader(8, "%s", out)
 	if err != nil {
-		return fmt.Errorf("fail to redirect logs : %v", err)
+		return nil, fmt.Errorf("fail to redirect logs : %v", err)
 	}
 
 	// Wait until the container exec process is completed
@@ -124,14 +123,14 @@ func (c *Container) exec(ctx ctx.WorkflowContext) error {
 	select {
 	case err := <-errCh:
 		if err != nil {
-			return err
+			return nil, err
 		}
 	case a := <-statusCh:
 		if a.StatusCode != 0 {
-			return fmt.Errorf("step failed with status %d", a.StatusCode)
+			return nil, fmt.Errorf("step failed with status %d", a.StatusCode)
 		}
 	}
-	return nil
+	return output, nil
 
 }
 

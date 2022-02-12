@@ -36,9 +36,9 @@ func ParseWorkflowFile(fileContent []byte, arguments map[string]string) (*Parsed
 		Name:        metadata.Name,
 		Description: metadata.Description,
 		Maintainer:  metadata.Maintainer,
-		Arguments:   "", // TODO : argument is string ???
 		Steps:       format.Workflow.Steps,
 		Imports:     externalTemplates,
+		Output:      metadata.Output,
 	}, nil
 }
 
@@ -107,11 +107,15 @@ func decodeWorkflowFile(fileContent []byte, workflowArguments map[string]interfa
 	return &workflowData, nil
 }
 
+func ReferenceStepOutput(stepName, varName string) string {
+	return fmt.Sprintf("{{ getVar \"%s\" \"%s\" }}", stepName, varName)
+}
+
 // applyContext Format the workflow file with the context to decode the go templates.
 // It returns the decoded file
 func applyContext(fileContent []byte, workflowArguments map[string]interface{}) ([]byte, error) {
 	// Parse the file with arguments
-	tmpl, err := template.New("configParser").Parse(string(fileContent))
+	tmpl, err := template.New("configParser").Funcs(template.FuncMap{"getVar": ReferenceStepOutput}).Parse(string(fileContent))
 	if err != nil {
 		return nil, fmt.Errorf("fail to parse template %v", err)
 	}

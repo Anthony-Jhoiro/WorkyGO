@@ -33,7 +33,8 @@ Type of the parameter, the supported types are :
 
 
 ##### `imports` (list)
-List of external templates used in the definition part. They can be used to split your workflow into multiple smaller workflows.
+List of external templates used in the definition part. They can be used to split your workflow into multiple smaller workflows. 
+
 
 > WARNING : The usage of template can expose your system to several risks, use them with precaution.
 
@@ -41,7 +42,8 @@ List of external templates used in the definition part. They can be used to spli
 Name of the workflow, the name will be used to reference the workflow later in the definition.
 
 ##### `imports`/`url` (string)
-Url of the file to import.
+Url of the file to import. 
+
 
 > Tip : If the template that you want to import is located in a GitHub repository, you can use `githubusercontent.com` to access it.
 

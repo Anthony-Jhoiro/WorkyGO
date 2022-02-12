@@ -42,4 +42,5 @@ type workflowMetadataTemplate struct {
 	Maintainer  string                       `yaml:"maintainer"`
 	Parameters  map[string]parameterTemplate `yaml:"parameters"`
 	Imports     []importTemplate             `yaml:"imports"`
+	Output      map[string]string            `yaml:"output,omitempty"`
 }

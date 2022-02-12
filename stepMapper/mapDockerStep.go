@@ -1,6 +1,7 @@
 package stepMapper
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"log"
 	"strings"
+	"text/template"
 )
 
 type StepDockerPersistFormat struct {
@@ -27,6 +29,11 @@ type StepDocker struct {
 	Executor  string                    `json:"executor,omitempty"`
 	volumes   []docker.VolumeConfig
 	client    *client.Client
+	output    map[string]string
+}
+
+func (ds *StepDocker) GetOutput() map[string]string {
+	return ds.output
 }
 
 func (ds *StepDocker) GetDependencies() []string {
@@ -57,8 +64,47 @@ func MapDockerStep(template interface{}) (*StepDocker, error) {
 	return &dockerStep, nil
 }
 
-func (ds *StepDocker) Init(ctx ctx.WorkflowContext) error {
-	// Map volumes
+func _resolveStepValue(parser *template.Template, value *string) error {
+
+	tpl, err := parser.Parse(*value)
+	if err != nil {
+		return fmt.Errorf("parsing error : %v", err)
+	}
+
+	buf := &bytes.Buffer{}
+
+	err = tpl.Execute(buf, nil)
+	if err != nil {
+		return fmt.Errorf("parsing error : %v", err)
+	}
+
+	*value = buf.String()
+
+	return nil
+}
+
+func (ds *StepDocker) resolveStepValues(previousStepsOutput map[string]map[string]string) error {
+	parser := template.New("parser").Funcs(template.FuncMap{"getVar": getOutputParser(previousStepsOutput)})
+
+	err := _resolveStepValue(parser, &ds.Workdir)
+	if err != nil {
+		return fmt.Errorf("fail to parse workdir : %v", err)
+	}
+	err = _resolveStepValue(parser, &ds.Commands)
+	if err != nil {
+		return fmt.Errorf("fail to parse commands : %v", err)
+	}
+
+	return nil
+}
+
+func (ds *StepDocker) Init(ctx ctx.WorkflowContext, previousStepsOutput map[string]map[string]string) error {
+
+	err := ds.resolveStepValues(previousStepsOutput)
+	if err != nil {
+		return fmt.Errorf("fail to parse some values : %v", err)
+	}
+
 	volumes := make([]docker.VolumeConfig, 0, len(ds.Persist))
 
 	for _, v := range ds.Persist {
@@ -139,10 +185,12 @@ func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 		return fmt.Errorf("fail to initialise container %v", err)
 	}
 
-	err = container.Run(ctx)
+	output, err := container.Run(ctx)
 	if err != nil {
 		return fmt.Errorf("fail to run the container %v", err)
 	}
+
+	ds.output = output
 
 	return nil
 }

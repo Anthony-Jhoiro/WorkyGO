@@ -1,0 +1,31 @@
+name: This workflow use the arg
+description: This workflow shows that a step can be used with any runtime
+
+maintainer: Anthony-Jhoiro
+
+imports:
+  - name: output-wf
+    url: https://raw.githubusercontent.com/Anthony-Jhoiro/WorkyGO/master/examples/with-output.yaml
+
+output:
+  hello: use-wf-output.hello
+
+
+---
+
+workflow:
+  steps:
+    - name: external-wf-with-output
+      workflow: output-wf
+
+    - name: use-wf-output
+      image: python:alpine3.15
+      workdir: /app
+      executor: python3
+      depends_on:
+        - external-wf-with-output
+      commands: |
+        print("::output::hello::Hello {{ getVar "external-wf-with-output" "wfname" }}::")
+
+
+
