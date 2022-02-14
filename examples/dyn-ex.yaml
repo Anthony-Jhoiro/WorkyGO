@@ -1,0 +1,22 @@
+name: Dynamic Workflow Example
+description: lorem ipsum dolor sit ahmet
+
+maintainer: Anthony-Jhoiro
+
+parameters:
+  run_step_2:
+    type: boolean
+---
+
+workflow:
+  steps:
+    - name: step-1
+      image: alpine:latest
+      commands: echo Step 1
+
+    {{ if (index .Parameters "run_step_2") }}
+
+    - name: step-2
+      image: node:lts
+      commands: echo Step 2
+    {{ end }}

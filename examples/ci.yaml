@@ -1,0 +1,99 @@
+# These fields are used to identify the workflow in a search engine like a registry
+name: CI for SuperMegaProject
+description: CI example for a basic node project
+maintainer: Anthony-Jhoiro
+
+# Parameters required to execute the workflow
+parameters:
+  git_repo:
+    description: Url of the git repository
+    type: string
+
+  is_release:
+    type: boolean
+
+# List of imports needed in the workflow (here, we are using it to import an external workflow that will be used to
+# pull our git image
+imports:
+  - name: gitclone
+    url: https://raw.githubusercontent.com/Anthony-Jhoiro/WorkyGo/master/examples/gitclone.yaml
+
+# these 3 dashes are very important !!! They separate the metadata part from the definition part.
+---
+
+# Definition of the workflow
+workflow:
+  # list of steps used in the workflow
+  steps:
+    # Clone the repository - This is a Workflow Step
+    - name: clone-repository # The name will be used to identify this step later
+      # Name of the imported workflow to use
+      workflow: gitclone
+      # Parameters needed to execute the imported workflow
+      parameters:
+        # Here we are using go template to access the git_repo parameter value
+        repository_url: {{ index .Parameters "git_repo" }}
+        output_volume: project
+
+
+    # Setup the node dependency - This is a Docker Step
+    - name: setup-dependencies
+      # Name of the docker image used in this step
+      image: node:lts
+      # Command to use
+      commands: npm install
+      # Directory where the command will be executed
+      workdir: /app
+      # List of steps that need to be complete before this step execution
+      depends_on:
+        - clone-repository
+      # List of volumes to attach to this step. Here we are using the "project" volume that have been initialize in the
+      # clone-repository step. As this step will rn after clone-repository, the volume will contain the cloned
+      # repository.
+      persist:
+        - name: project
+          # Directory where the volume needs to be mapped
+          source: /app
+
+    # The next steps (run-tests and run-linter) both depends on the setup-dependency step, so they will be executed
+    # simultaneously
+
+    # Run tests - This is a Docker Step
+    - name: run-tests
+      image: node:lts
+      commands: npm run test
+      workdir: /app
+      depends_on:
+        - setup-dependencies
+      persist:
+        - name: project
+          source: /app
+
+    # Run linter - This is a Docker Step
+    - name: run-linter
+      image: node:lts
+      commands: npm run lint
+      workdir: /app
+      depends_on:
+        - setup-dependencies
+      persist:
+        - name: project
+          source: /app
+
+    # This is a go template to use the build step only if the argument for "is_release" is truthy (see the go template
+    # reference
+    {{ if (index .Parameters "is_release") }}
+
+    - name: build-app
+      image: node:lts
+      commands: npm run build
+      persist:
+        - name: project
+          source: /app
+      # This step must be executed after the run-linter and the run-tests steps
+      depends_on:
+        - run-linter
+        - run-tests
+
+    # End of the if condition
+    {{ end }}

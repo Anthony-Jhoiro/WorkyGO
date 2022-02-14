@@ -83,6 +83,7 @@ func (ws *StepWorkflow) Init(ctx ctx.WorkflowContext, previousStepsOutput map[st
 	parentLogger := ctx.GetLogger()
 	stepLogger := parentLogger.Copy("-")
 	parsedWorkflow.SetLogger(stepLogger)
+	parsedWorkflow.SetRunNumber(ctx.GetRunNumber())
 
 	ws.wf = wf
 	ws.innerContext = parsedWorkflow

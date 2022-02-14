@@ -27,7 +27,8 @@ func (wf *Workflow) Print() {
 
 func (wf *Workflow) Run(ctx ctx.WorkflowContext) (map[string]map[string]string, error) {
 	channel := make(chan *Step, wf.nodeCount)
-	runningSteps := 1
+	runningSteps := new(int32)
+	*runningSteps = 1
 
 	stepsOutput := make(map[string]map[string]string)
 
@@ -35,9 +36,10 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) (map[string]map[string]string, 
 
 	go wf.firstStep.Execute(channel, ctx, stepsOutput)
 
-	for runningSteps != 0 {
+	for *runningSteps != 0 {
 		closingStep := <-channel
-		runningSteps -= 1
+		//*runningSteps -= 1
+		*runningSteps -= 1
 		stepsOutput[closingStep.GetLabel()] = closingStep.GetOutput()
 
 		if closingStep.Status == StepFail {
@@ -48,13 +50,14 @@ func (wf *Workflow) Run(ctx ctx.WorkflowContext) (map[string]map[string]string, 
 		for _, e := range closingStep.NextSteps {
 
 			requirementsOk, err := e.RequirementsFulfilled()
-			runningSteps += 1
 
 			if err != nil {
+				*runningSteps += 1
 				go func(executable *Step) {
 					executable.fail(channel)
 				}(e)
 			} else if requirementsOk {
+				*runningSteps += 1
 				go func(executable *Step) {
 					executable.Execute(channel, ctx, stepsOutput)
 				}(e)

@@ -1,7 +1,6 @@
 package stepMapper
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -62,25 +61,6 @@ func MapDockerStep(template interface{}) (*StepDocker, error) {
 	}
 
 	return &dockerStep, nil
-}
-
-func _resolveStepValue(parser *template.Template, value *string) error {
-
-	tpl, err := parser.Parse(*value)
-	if err != nil {
-		return fmt.Errorf("parsing error : %v", err)
-	}
-
-	buf := &bytes.Buffer{}
-
-	err = tpl.Execute(buf, nil)
-	if err != nil {
-		return fmt.Errorf("parsing error : %v", err)
-	}
-
-	*value = buf.String()
-
-	return nil
 }
 
 func (ds *StepDocker) resolveStepValues(previousStepsOutput map[string]map[string]string) error {
@@ -168,7 +148,7 @@ func (ds *StepDocker) Run(ctx ctx.WorkflowContext) error {
 		Config: docker.Config{
 			Volumes:    ds.volumes,
 			Env:        nil,
-			WorkingDir: "",
+			WorkingDir: ds.Workdir,
 			Entrypoint: executor,
 			Name:       ds.Name,
 			Commands:   []string{ds.Commands},
