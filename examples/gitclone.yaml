@@ -15,7 +15,7 @@ workflow:
   steps:
     - name: GitCloneRepository
       image: alpine/git:v2.32.0
-      workdir: /repo
+      workingDir: /repo
       commands: git clone {{ index .Parameters "repository_url" }} .
       persist:
         - name: "{{ index .Parameters "output_volume" }}"

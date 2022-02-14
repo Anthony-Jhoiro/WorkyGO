@@ -9,6 +9,10 @@ External workflows work with `imports`, see the declaration in the metadata synt
 ### `name` (string)
 Name of the step, you can use any letters and dashes.
 
+```yaml
+
+```
+
 ### `workflow` (string)
 Name of the imported workflow (see the declarations of `imports` in the metadata syntax)
 
