@@ -2,12 +2,18 @@
 
 **Repo** : [https://github.com/Anthony-Jhoiro/WorkyGO](https://github.com/Anthony-Jhoiro/WorkyGO)
 
+WorkyGo is a tool to manage workflows. These workflows can be used to automate your daily tasks or build your CI/CD pipeline. Anything is possible !
+
+You can find some working examples in the example directory. If you want to see a complete workflow example, I recommend starting with the [ci example](examples/ci.yaml).
+
 ## Authors 
 - Anthony Quéré (Anthony-Jhoiro)
 
 ## Documentation
+- [Use the CLI](docs/cli.md)
 - [Basics](docs/usages.md)
 - [Metadata](docs/metdata.md)
+- [Definition](docs/definition.md)
 - [Docker Step](docs/docker-step.md)
 - [Workflow Step](docs/workflow-step.md)
 - [Work With outputs](docs/work-with-ouputs.md)
